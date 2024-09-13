@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignore PostgreSQL and Docker configuration and log files
+src/docker/data/
