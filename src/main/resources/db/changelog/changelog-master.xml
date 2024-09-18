@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="20240913-1" author="echamale">
+        <createTable tableName="role">
+            <column name="role_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_role_id"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="varchar(75)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true"/>
+        </createTable>
+
+        <createTable tableName="profile">
+            <column name="profile_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_profile_id"/>
+            </column>
+            <column name="name" type="varchar(30)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="varchar(75)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true"/>
+        </createTable>
+
+        <createTable tableName="profile_role_detail">
+            <column name="profile_id" type="int">
+                <constraints nullable="true" primaryKey="true" />
+            </column>
+            <column name="role_id" type="int">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile_role_detail"
+                                 baseColumnNames="profile_id"
+                                 constraintName="FK_profileRoleDetail_profile"
+                                 referencedTableName="profile"
+                                 referencedColumnNames="profile_id"/>
+
+        <addForeignKeyConstraint baseTableName="profile_role_detail"
+                                 baseColumnNames="role_id"
+                                 constraintName="FK_profileRoleDetail_role"
+                                 referencedTableName="role"
+                                 referencedColumnNames="role_id"/>
+
+        <createTable tableName="user">
+            <column name="user_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="full_name" type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_of_birth" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="email" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true"/>
+            <column name="profile_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="user"
+                                 baseColumnNames="profile_id"
+                                 constraintName="FK_user_profile"
+                                 referencedTableName="profile"
+                                 referencedColumnNames="profile_id"/>
+
+        <createTable tableName="audit">
+            <column name="audit_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_audit_id"/>
+            </column>
+            <column name="entity" type="varchar(25)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="request" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="response" type="JSON"/>
+            <column name="response_time" type="float"/>
+            <column name="datetime" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="operation" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="audit"
+                                 baseColumnNames="user_id"
+                                 constraintName="FK_audit_user"
+                                 referencedTableName="user"
+                                 referencedColumnNames="user_id"/>
+
+    </changeSet>
+</databaseChangeLog>
