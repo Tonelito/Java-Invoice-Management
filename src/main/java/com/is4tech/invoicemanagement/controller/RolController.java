@@ -6,7 +6,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +33,9 @@ public class RolController {
     @Autowired  
     private RolService rolService;
 
+    private static final String NAME_ENTITY = "Rol";
+    private static final String ID_ENTITY = "Rol";
+
     @PostMapping("/rol")
     public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException{
         Rol rolSave = null;
@@ -55,24 +57,24 @@ public class RolController {
     }
 
     @PutMapping("/rol/{id}")
-    public HttpEntity<Message> updateRol(@RequestBody RolDto rolDto,@PathVariable Integer id) throws BadRequestException{
-        Rol rolSave = null;
+    public ResponseEntity<Message> updateRol(@RequestBody RolDto rolDto,@PathVariable Integer id) throws BadRequestException{
+        Rol rolUpdate = null;
         try {
             if(rolService.existById(id)){
                 rolDto.setRolId(id);
-                rolSave = rolService.saveRol(rolDto);
+                rolUpdate = rolService.saveRol(rolDto);
                 return new ResponseEntity<>(Message.builder()
                     .note("Update successfully")
                     .object(RolDto.builder()
-                            .rolId(rolSave.getRolId())
-                            .description(rolSave.getDescription())
-                            .name(rolSave.getName())
-                            .status(rolSave.getStatus())
+                            .rolId(rolUpdate.getRolId())
+                            .description(rolUpdate.getDescription())
+                            .name(rolUpdate.getName())
+                            .status(rolUpdate.getStatus())
                             .build())
                     .build(),
-                    HttpStatus.CREATED);
+                    HttpStatus.OK);
             } else
-                throw new ResourceNorFoundException("Rol","id",id.toString());
+                throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
             
         } catch (DataAccessException exDt) {
             throw new BadRequestException("Error update record: " + exDt.getMessage());
@@ -97,7 +99,7 @@ public class RolController {
     public ResponseEntity<Message> showByIdRol(@PathVariable Integer id){
         Rol rol = rolService.findByIdRol(id);
         if(rol == null)
-            throw new ResourceNorFoundException("Rol","id",id.toString());
+            throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
 
         return new ResponseEntity<>(Message.builder()
                                         .note("Record found")
@@ -112,10 +114,10 @@ public class RolController {
     }
 
     @GetMapping("/rols")
-    public ResponseEntity<Message> showAllRols(@PageableDefault(size = 1) Pageable pageable){
-        Page<Rol> rols = rolService.listAll(pageable);
+    public ResponseEntity<Message> showAllRols(@PageableDefault(size = 10) Pageable pageable){
+        Page<Rol> rols = rolService.listAllRol(pageable);
         if(rols.isEmpty())
-            throw new ResourceNorFoundException("Rol");
+            throw new ResourceNorFoundException(NAME_ENTITY);
 
         return new ResponseEntity<>(Message.builder()
                                     .note("Records found")

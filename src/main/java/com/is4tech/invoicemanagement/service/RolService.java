@@ -19,7 +19,7 @@ public class RolService {
     private RolRepository rolRepository;
 
     //Allows you to prevent the compiler from adding about:
-    public Page<Rol> listAll(Pageable pageable){
+    public Page<Rol> listAllRol(Pageable pageable){
         return rolRepository.findAll(pageable);
     }
     
