@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.is4tech.invoicemanagement.bo.Rol;
+import com.is4tech.invoicemanagement.model.Rol;
 import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.repository.RolRepository;
 
