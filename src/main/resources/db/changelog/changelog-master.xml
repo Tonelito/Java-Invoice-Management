@@ -109,4 +109,8 @@
                                  referencedColumnNames="user_id"/>
 
     </changeSet>
+
+    <changeSet id="20240918-2" author="echamale">
+        <renameTable oldTableName="user" newTableName="users"/>
+    </changeSet>
 </databaseChangeLog>
