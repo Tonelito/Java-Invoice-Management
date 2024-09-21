@@ -26,7 +26,7 @@ import com.is4tech.invoicemanagement.utils.Message;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/invoice-management/v0.1/")
 public class ProfileController {
   
   @Autowired

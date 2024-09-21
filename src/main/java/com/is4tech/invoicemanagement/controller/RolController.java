@@ -26,7 +26,7 @@ import com.is4tech.invoicemanagement.utils.Message;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/invoice-management/v0.1/")
 public class RolController {
     
     //Autowired: Gives us control when injecting our instances
@@ -34,7 +34,7 @@ public class RolController {
     private RolService rolService;
 
     private static final String NAME_ENTITY = "Rol";
-    private static final String ID_ENTITY = "Rol";
+    private static final String ID_ENTITY = "Id";
 
     @PostMapping("/rol")
     public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException{

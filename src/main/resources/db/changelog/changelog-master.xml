@@ -64,7 +64,7 @@
                 <constraints nullable="true"/>
             </column>
             <column name="email" type="varchar(50)">
-                <constraints nullable="true"/>
+                <constraints nullable="true" unique="true"/>
             </column>
             <column name="password" type="varchar(255)">
                 <constraints nullable="true"/>

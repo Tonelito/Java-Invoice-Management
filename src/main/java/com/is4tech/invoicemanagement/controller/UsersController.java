@@ -1,11 +1,15 @@
 package com.is4tech.invoicemanagement.controller;
 
 import com.is4tech.invoicemanagement.dto.LoginDto;
-import com.is4tech.invoicemanagement.dto.RegisterDto;
+import com.is4tech.invoicemanagement.dto.UsersDto;
+import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.response.LoginResponse;
-import com.is4tech.invoicemanagement.service.AuthenticationService;
 import com.is4tech.invoicemanagement.service.JwtService;
+import com.is4tech.invoicemanagement.service.UsersService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,20 +19,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
-@RequestMapping("/auth")
+@RequestMapping("/invoice-management/v0.1/auth/")
 @RestController
-public class AuthenticationController {
+public class UsersController {
     private final JwtService jwtService;
-    private final AuthenticationService authenticationService;
+    private final UsersService authenticationService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
+    public UsersController(JwtService jwtService, UsersService authenticationService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
+    public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) {
+        User registeredUser = authenticationService.signup(usersDto);
 
         return ResponseEntity.ok(registeredUser);
     }
