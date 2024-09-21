@@ -64,7 +64,7 @@
                 <constraints nullable="true"/>
             </column>
             <column name="email" type="varchar(50)">
-                <constraints nullable="true"/>
+                <constraints nullable="true" unique="true"/>
             </column>
             <column name="password" type="varchar(255)">
                 <constraints nullable="true"/>
@@ -108,5 +108,9 @@
                                  referencedTableName="user"
                                  referencedColumnNames="user_id"/>
 
+    </changeSet>
+
+    <changeSet id="20240918-2" author="echamale">
+        <renameTable oldTableName="user" newTableName="users"/>
     </changeSet>
 </databaseChangeLog>

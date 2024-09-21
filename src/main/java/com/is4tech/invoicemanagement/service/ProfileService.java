@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.is4tech.invoicemanagement.bo.Profile;
+import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;
 

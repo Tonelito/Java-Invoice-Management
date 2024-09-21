@@ -1,17 +1,15 @@
-package com.is4tech.invoicemanagement.bo;
+package com.is4tech.invoicemanagement.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,7 +19,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "profile")
 public class Profile {
-  
+
   @Id
   @Column(name = "profile_id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +36,7 @@ public class Profile {
   @Column(name = "status")
   private Boolean status;
 
+  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JsonManagedReference
+  private List<ProfileRoleDetail> roles;
 }

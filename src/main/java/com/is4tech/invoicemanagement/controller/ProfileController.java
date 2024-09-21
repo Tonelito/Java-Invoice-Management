@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.is4tech.invoicemanagement.bo.Profile;
+import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
@@ -26,7 +26,7 @@ import com.is4tech.invoicemanagement.utils.Message;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/invoice-management/v0.1/")
 public class ProfileController {
   
   @Autowired
