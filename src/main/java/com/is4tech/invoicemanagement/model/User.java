@@ -31,8 +31,7 @@ public class User implements UserDetails {
     @NotEmpty(message = "Name is required")
     @Column(name = "full_name", length = 100, nullable = false)
     private String fullName;
-    
-    @NotEmpty(message = "Date of birth is required")
+
     @Column(name = "date_of_birth")
     private Date dateOfBirth;
     
