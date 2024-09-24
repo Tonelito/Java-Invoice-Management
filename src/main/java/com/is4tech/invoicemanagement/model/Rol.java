@@ -37,7 +37,7 @@ public class Rol implements Serializable{
     @Column(name = "status")
     private Boolean status;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ProfileRoleDetail> profiles;
 }

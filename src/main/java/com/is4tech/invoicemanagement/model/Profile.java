@@ -36,7 +36,7 @@ public class Profile {
   @Column(name = "status")
   private Boolean status;
 
-  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @JsonManagedReference
   private List<ProfileRoleDetail> roles;
 }
