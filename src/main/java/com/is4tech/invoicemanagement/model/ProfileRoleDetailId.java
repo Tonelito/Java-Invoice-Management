@@ -3,6 +3,7 @@ package com.is4tech.invoicemanagement.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class ProfileRoleDetailId implements Serializable {
 
     @Column(name = "profile_id")
@@ -24,15 +26,15 @@ public class ProfileRoleDetailId implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProfileRoleDetailId that = (ProfileRoleDetailId) o;
+        if (this == o) return true; // Compara la referencia de objeto
+        if (o == null || getClass() != o.getClass()) return false; // Verifica si el objeto es nulo o no es de la misma clase
+        ProfileRoleDetailId that = (ProfileRoleDetailId) o; // Hace un cast a ProfileRoleDetailId
         return Objects.equals(profileId, that.profileId) &&
                 Objects.equals(roleId, that.roleId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(profileId, roleId);
+        return Objects.hash(profileId, roleId); // Genera un código hash basado en los campos
     }
 }

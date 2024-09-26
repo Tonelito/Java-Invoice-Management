@@ -33,7 +33,7 @@ public class ProfileController {
   private ProfileService profileService;
 
   private static final String NAME_ENTITY = "Profile";
-  private static final String ID_ENTITY = "Id";
+  private static final String ID_ENTITY = "profile_id";
 
   @PostMapping("/profile")
   public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
