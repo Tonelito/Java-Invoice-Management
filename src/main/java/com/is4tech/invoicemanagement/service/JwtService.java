@@ -95,6 +95,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> extractAuthorities(String token) {
         Claims claims = extractAllClaims(token);
         return claims.get("authorities", List.class);
