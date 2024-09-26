@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -17,8 +18,10 @@ import java.util.Objects;
 @Setter
 public class ProfileRoleDetailId implements Serializable {
 
+    @JsonBackReference
     @Column(name = "profile_id")
     private Integer profileId;
+    @JsonBackReference
     @Column(name = "role_id")
     private Integer roleId;
 

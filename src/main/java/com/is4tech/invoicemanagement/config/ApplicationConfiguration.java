@@ -1,7 +1,7 @@
 package com.is4tech.invoicemanagement.config;
 
 import com.is4tech.invoicemanagement.model.User;
-import com.is4tech.invoicemanagement.repository.UserRepository;
+import com.is4tech.invoicemanagement.repository.AuthRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class ApplicationConfiguration {
-    private final UserRepository userRepository;
+    private final AuthRepository userRepository;
 
-    public ApplicationConfiguration(UserRepository userRepository) {
+    public ApplicationConfiguration(AuthRepository userRepository) {
         this.userRepository = userRepository;
     }
 
