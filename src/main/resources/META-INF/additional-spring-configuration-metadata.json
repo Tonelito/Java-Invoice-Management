@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "app.alloworigin",
+      "type": "java.lang.String",
+      "description": "Description"
+  }
+] }
