@@ -18,24 +18,24 @@ import java.util.Objects;
 @Setter
 public class ProfileRoleDetailId implements Serializable {
 
-    @JsonBackReference
     @Column(name = "profile_id")
-    private Integer profileId;
     @JsonBackReference
+    private Integer profileId;
     @Column(name = "role_id")
+    @JsonBackReference
     private Integer roleId;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProfileRoleDetailId that = (ProfileRoleDetailId) o;
+        if (this == o) return true; // Compara la referencia de objeto
+        if (o == null || getClass() != o.getClass()) return false; // Verifica si el objeto es nulo o no es de la misma clase
+        ProfileRoleDetailId that = (ProfileRoleDetailId) o; // Hace un cast a ProfileRoleDetailId
         return Objects.equals(profileId, that.profileId) &&
                 Objects.equals(roleId, that.roleId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(profileId, roleId);
+        return Objects.hash(profileId, roleId); // Genera un código hash basado en los campos
     }
 }

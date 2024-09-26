@@ -25,7 +25,7 @@ public class UserController {
     private UserService userService;
 
     private static final String NAME_ENTITY = "Users";
-    private static final String ID_ENTITY = "Id";
+    private static final String ID_ENTITY = "user_id";
 
     @PostMapping("/user")
     public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto) {
