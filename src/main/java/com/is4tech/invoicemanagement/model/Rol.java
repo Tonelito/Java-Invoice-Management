@@ -1,16 +1,12 @@
 package com.is4tech.invoicemanagement.model;
 
-import java.io.Serializable;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,7 +33,7 @@ public class Rol implements Serializable{
     @Column(name = "status")
     private Boolean status;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference
     private List<ProfileRoleDetail> profiles;
 }

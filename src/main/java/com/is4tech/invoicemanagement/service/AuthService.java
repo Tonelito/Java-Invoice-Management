@@ -5,21 +5,21 @@ import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;
-import com.is4tech.invoicemanagement.repository.UserRepository;
+import com.is4tech.invoicemanagement.repository.AuthRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UsersService {
-    private final UserRepository userRepository;
+public class AuthService {
+    private final AuthRepository userRepository;
     private final ProfileRespository profileRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public UsersService(
-            UserRepository userRepository,
+    public AuthService(
+            AuthRepository userRepository,
             ProfileRespository profileRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder
@@ -36,7 +36,6 @@ public class UsersService {
         user.setEmail(input.getEmail());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
         user.setDateOfBirth(input.getDateOfBirth());
-        System.out.println("--------" + input.getProfileId() + "------------" + profileRepository.existsById(input.getProfileId()));
         Profile profile = profileRepository.findById(input.getProfileId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
         user.setProfile(profile);
