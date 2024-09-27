@@ -1,7 +1,11 @@
 package com.is4tech.invoicemanagement.controller;
 
+import com.is4tech.invoicemanagement.dto.CodePasswordDto;
+import com.is4tech.invoicemanagement.dto.EmailDto;
 import com.is4tech.invoicemanagement.dto.LoginDto;
+import com.is4tech.invoicemanagement.dto.UserChangePasswordDto;
 import com.is4tech.invoicemanagement.dto.UsersDto;
+import com.is4tech.invoicemanagement.dto.VerificCodeRequest;
 import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.response.LoginResponse;
 import com.is4tech.invoicemanagement.service.JwtService;
@@ -16,6 +20,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,11 +33,13 @@ import java.util.stream.Collectors;
 public class AuthController {
     private final JwtService jwtService;
     private final AuthService authenticationService;
+    private final PasswordEncoder passwordEncoder;
     private final SendEmail sendEmail;
 
-    public AuthController(JwtService jwtService, AuthService authenticationService, SendEmail sendEmail) {
+    public AuthController(JwtService jwtService, AuthService authenticationService, PasswordEncoder passwordEncoder, SendEmail sendEmail) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.passwordEncoder = passwordEncoder;
         this.sendEmail = sendEmail;
     }
 
@@ -66,32 +73,57 @@ public class AuthController {
     }
 
     @PostMapping("/recover-password")
-    public ResponseEntity<Message> recoverPassword(@RequestBody String email) {
+    public ResponseEntity<Message> recoverPassword(@RequestBody EmailDto emailDto) {
+        authenticationService.findByEmail(emailDto.getEmail());
         String passwordCode = ResetCodeGenerator.getPassword(
-                                ResetCodeGenerator.MINUSCULAS+
-                                ResetCodeGenerator.MAYUSCULAS+
-                                ResetCodeGenerator.NUMEROS,10); 
-                                
+                                ResetCodeGenerator.MINUSCULAS + 
+                                ResetCodeGenerator.MAYUSCULAS + 
+                                ResetCodeGenerator.NUMEROS, 10);
+        
         sendEmail.sendEmailRestorationCode(
-                email,
-                "infoFactura@facturacio.fac.com", 
-                "Recovery Password",
-                "Your recovery code is: \n" + passwordCode, passwordCode);
-
+            emailDto.getEmail(), 
+            "infoFactura@facturacio.fac.com", 
+            "Recovery Password", 
+            "Your recovery code is: \n" + passwordCode, 
+            passwordCode,
+            emailDto.getEmail()
+        );
+    
         return new ResponseEntity<>(Message.builder()
                     .note("Email Send")
                     .object(null)
                     .build(),
                     HttpStatus.OK);
     }
-
+    
     @PostMapping("/verific-code")
-    public ResponseEntity<Message> verificRecoverPassword(@RequestBody String code) {
-        String response = sendEmail.verificCode(code);
-
+    public ResponseEntity<Message> verificRecoverPassword(@RequestBody VerificCodeRequest verificCodeRequest) {
+        String response = sendEmail.verificCode(verificCodeRequest.getCodePassword());
+        
+        if (response.equals("Code valid")) {
+            String newPassword = passwordEncoder.encode(verificCodeRequest.getCodePassword().getNewPassword());
+            authenticationService.updatePasswordCode(newPassword, verificCodeRequest.getEmail().getEmail());
+            response = "The password modified successfully";
+        }
+        
         return new ResponseEntity<>(Message.builder()
-                    .note("Code is valued succeful")
+                    .note("Code verification result")
                     .object(response)
+                    .build(),
+                    HttpStatus.OK);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Message> changePassword(@RequestBody UserChangePasswordDto userChangePasswordDto) {
+        String message = "The password not modific";
+        User user = authenticationService.findByEmail(userChangePasswordDto.getEmail());
+        if(passwordEncoder.matches(userChangePasswordDto.getPassword(), user.getPassword())){
+            authenticationService.updatePasswordCode(passwordEncoder.encode(userChangePasswordDto.getNewPassword()), userChangePasswordDto.getEmail());
+            message = "The password modified";
+        }
+        return new ResponseEntity<>(Message.builder()
+                    .note("Code verification result")
+                    .object(message)
                     .build(),
                     HttpStatus.OK);
     }
