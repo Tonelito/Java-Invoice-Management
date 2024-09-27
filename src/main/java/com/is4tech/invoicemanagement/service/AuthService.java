@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.service;
 
+import com.is4tech.invoicemanagement.dto.CodePasswordDto;
 import com.is4tech.invoicemanagement.dto.LoginDto;
 import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.model.Profile;
@@ -71,5 +72,13 @@ public class AuthService {
 
         return userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public User findByEmail(String email){
+        return userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
+    }
+
+    public void updatePasswordCode(String newPassword, String email){
+        userRepository.updatePassword(newPassword,email);
     }
 }

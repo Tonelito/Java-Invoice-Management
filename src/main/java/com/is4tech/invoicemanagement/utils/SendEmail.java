@@ -7,7 +7,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
+import com.is4tech.invoicemanagement.dto.CodePasswordDto;
 import com.is4tech.invoicemanagement.dto.CodeRecoveryDto;
+import com.is4tech.invoicemanagement.service.AuthService;
 import com.is4tech.invoicemanagement.service.CodeRecoveryService;
 
 @Component
@@ -28,14 +30,14 @@ public class SendEmail {
     mail.send(email);
   }
 
-  public void sendEmailRestorationCode(String destination, String from, String subjet, String text, String codigoRestauracion){
-    SimpleMailMessage email = new SimpleMailMessage();
-    email.setTo(destination);
-    email.setFrom(from);
-    email.setSubject(subjet);
-    email.setText(text);
-    mail.send(email);
-    
+  public void sendEmailRestorationCode(String destination, String from, String subjet, String text, String codigoRestauracion, String email) {
+    SimpleMailMessage emailMessage = new SimpleMailMessage();
+    emailMessage.setTo(destination);
+    emailMessage.setFrom(from);
+    emailMessage.setSubject(subjet);
+    emailMessage.setText(text);
+    mail.send(emailMessage);
+
     CodeRecoveryDto codeRecoveryDto = CodeRecoveryDto.builder()
       .code(codigoRestauracion)
       .expirationDate(new Date())
@@ -44,16 +46,14 @@ public class SendEmail {
     codeRecoveryService.saveCodeRecovery(codeRecoveryDto);
   }
 
-  public String verificCode(String code) {
-    code = code.replace("\"", "");
+  public String verificCode(CodePasswordDto codePasswordDto) {
+    String code = codePasswordDto.getCode();
     CodeRecoveryDto codeRecoveryDto = codeRecoveryService.findByCodeCodeRecovery(code);
-    
     if (codeRecoveryDto == null) {
         return "The code does not exist / not valid";
     }
     
     Date dateCurrent = new Date();
-
     Date expirationDate = codeRecoveryDto.getExpirationDate();
     long differenceInMillis = dateCurrent.getTime() - expirationDate.getTime();
     long differenceInHours = differenceInMillis / (1000 * 60 * 60);
@@ -61,7 +61,7 @@ public class SendEmail {
     if (differenceInHours < 2) {
         if (code.equals(codeRecoveryDto.getCode())) {
             codeRecoveryService.deleteCodeRecovery(codeRecoveryDto.getCodeRecoveryId());
-            return "The code is valid";
+            return "Code valid";
         } else {
             return "The code is invalid";
         }
