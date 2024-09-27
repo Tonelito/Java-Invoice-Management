@@ -249,4 +249,14 @@
             <column name="status" type="boolean" defaultValue="true"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="20240926" author="dalvarado">
+        <createTable tableName="code_recovery">
+            <column name="code_recovery_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_code_recovery_id"/>
+            </column>
+            <column name="code" type="varchar(10)"/>
+            <column name="expiration_date" type="datetime"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

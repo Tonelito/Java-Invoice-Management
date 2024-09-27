@@ -6,6 +6,9 @@ import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;
 import com.is4tech.invoicemanagement.repository.UserRepository;
+import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
+import com.is4tech.invoicemanagement.utils.SendEmail;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,24 +20,38 @@ public class UsersService {
     private final ProfileRespository profileRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final SendEmail sendEmail;
 
     public UsersService(
             UserRepository userRepository,
             ProfileRespository profileRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            SendEmail sendEmail
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.profileRepository = profileRepository;
+        this.sendEmail = sendEmail;
     }
 
     public User signup(UsersDto input) {
         User user = new User();
+        String passwordCode = ResetCodeGenerator.getPassword(
+                                ResetCodeGenerator.MINUSCULAS+
+                                ResetCodeGenerator.MAYUSCULAS+
+                                ResetCodeGenerator.NUMEROS,10); 
+        sendEmail.sendEmailPassword(
+                input.getEmail(),
+                "infoFactura@facturacio.fac.com", 
+                "Credentails",
+                "Your login credentials are: \nEmail = " + input.getEmail() +
+                "\nPassword = "+ passwordCode);
+
         user.setFullName(input.getFullName());
         user.setEmail(input.getEmail());
-        user.setPassword(passwordEncoder.encode(input.getPassword()));
+        user.setPassword(passwordEncoder.encode(passwordCode));
         user.setDateOfBirth(input.getDateOfBirth());
         System.out.println("--------" + input.getProfileId() + "------------" + profileRepository.existsById(input.getProfileId()));
         Profile profile = profileRepository.findById(input.getProfileId())

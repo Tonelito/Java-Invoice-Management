@@ -1,18 +1,30 @@
 package com.is4tech.invoicemanagement.utils;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-
 public class ResetCodeGenerator {
 
-    private ResetCodeGenerator(){}
-    
-    private static final SecureRandom secureRandom = new SecureRandom();
-    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder(); // Evita caracteres como "+", "/" o "="
-
-    public static String generateResetCode(int length) {
-        byte[] randomBytes = new byte[length];
-        secureRandom.nextBytes(randomBytes);
-        return base64Encoder.encodeToString(randomBytes).substring(0, length);
-    }
+	public static String NUMEROS = "0123456789";
+	public static String MAYUSCULAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public static String MINUSCULAS = "abcdefghijklmnopqrstuvwxyz";
+ 
+	public static String getPinNumber() {
+		return getPassword(NUMEROS, 4);
+	}
+ 
+	public static String getPassword() {
+		return getPassword(8);
+	}
+ 
+	public static String getPassword(int length) {
+		return getPassword(NUMEROS + MAYUSCULAS + MINUSCULAS, length);
+	}
+ 
+	public static String getPassword(String key, int length) {
+		String pswd = "";
+ 
+		for (int i = 0; i < length; i++) {
+			pswd+=(key.charAt((int)(Math.random() * key.length())));
+		}
+ 
+		return pswd;
+	}
 }

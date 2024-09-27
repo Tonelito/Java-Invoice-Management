@@ -1,39 +1,72 @@
 package com.is4tech.invoicemanagement.utils;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.stereotype.Component;
 
-@RequestMapping("/test/v1")
-@RestController
+import com.is4tech.invoicemanagement.dto.CodeRecoveryDto;
+import com.is4tech.invoicemanagement.service.CodeRecoveryService;
+
+@Component
 public class SendEmail {
   
   @Autowired
   private JavaMailSender mail;
 
-  @PostMapping("/sendEmail")
-  public ResponseEntity<Boolean> sendEmail(@RequestBody String destination){
-    SimpleMailMessage envio = configurationEmail(destination);
-    mail.send(envio);
-    return new ResponseEntity<>(true, HttpStatus.OK);
+  @Autowired
+  private CodeRecoveryService codeRecoveryService;
+
+  public void sendEmailPassword(String destination, String from, String subjet, String text){
+    SimpleMailMessage email = new SimpleMailMessage();
+    email.setTo(destination);
+    email.setFrom(from);
+    email.setSubject(subjet);
+    email.setText(text);
+    mail.send(email);
   }
 
-  private SimpleMailMessage configurationEmail(String destination){
-    
+  public void sendEmailRestorationCode(String destination, String from, String subjet, String text, String codigoRestauracion){
     SimpleMailMessage email = new SimpleMailMessage();
-    String codigoRestauracion = ResetCodeGenerator.generateResetCode(10);
-
     email.setTo(destination);
-    email.setFrom("facturacion757@gmail.com");
-    email.setSubject("Recuperacion de Contraseña");
-    email.setText("Tu codigo de recuperacion es: " + codigoRestauracion);
+    email.setFrom(from);
+    email.setSubject(subjet);
+    email.setText(text);
+    mail.send(email);
+    
+    CodeRecoveryDto codeRecoveryDto = CodeRecoveryDto.builder()
+      .code(codigoRestauracion)
+      .expirationDate(new Date())
+      .build();
 
-    return email;
+    codeRecoveryService.saveCodeRecovery(codeRecoveryDto);
+  }
+
+  public String verificCode(String code) {
+    code = code.replace("\"", "");
+    CodeRecoveryDto codeRecoveryDto = codeRecoveryService.findByCodeCodeRecovery(code);
+    
+    if (codeRecoveryDto == null) {
+        return "The code does not exist / not valid";
+    }
+    
+    Date dateCurrent = new Date();
+
+    Date expirationDate = codeRecoveryDto.getExpirationDate();
+    long differenceInMillis = dateCurrent.getTime() - expirationDate.getTime();
+    long differenceInHours = differenceInMillis / (1000 * 60 * 60);
+
+    if (differenceInHours < 2) {
+        if (code.equals(codeRecoveryDto.getCode())) {
+            codeRecoveryService.deleteCodeRecovery(codeRecoveryDto.getCodeRecoveryId());
+            return "The code is valid";
+        } else {
+            return "The code is invalid";
+        }
+    } else {
+        return "The code expired";
+    }
   }
 }

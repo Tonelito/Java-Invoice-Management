@@ -6,9 +6,13 @@ import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.response.LoginResponse;
 import com.is4tech.invoicemanagement.service.JwtService;
 import com.is4tech.invoicemanagement.service.UsersService;
+import com.is4tech.invoicemanagement.utils.Message;
+import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
+import com.is4tech.invoicemanagement.utils.SendEmail;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,10 +27,12 @@ import java.util.stream.Collectors;
 public class UsersController {
     private final JwtService jwtService;
     private final UsersService authenticationService;
+    private final SendEmail sendEmail;
 
-    public UsersController(JwtService jwtService, UsersService authenticationService) {
+    public UsersController(JwtService jwtService, UsersService authenticationService, SendEmail sendEmail) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.sendEmail = sendEmail;
     }
 
     @PostMapping("/signup")
@@ -50,5 +56,36 @@ public class UsersController {
                         .collect(Collectors.toList()));
 
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("/recover-password")
+    public ResponseEntity<Message> recoverPassword(@RequestBody String email) {
+        String passwordCode = ResetCodeGenerator.getPassword(
+                                ResetCodeGenerator.MINUSCULAS+
+                                ResetCodeGenerator.MAYUSCULAS+
+                                ResetCodeGenerator.NUMEROS,10); 
+                                
+        sendEmail.sendEmailRestorationCode(
+                email,
+                "infoFactura@facturacio.fac.com", 
+                "Recovery Password",
+                "Your recovery code is: \n" + passwordCode, passwordCode);
+
+        return new ResponseEntity<>(Message.builder()
+                    .note("Email Send")
+                    .object(null)
+                    .build(),
+                    HttpStatus.OK);
+    }
+
+    @PostMapping("/verific-code")
+    public ResponseEntity<Message> verificRecoverPassword(@RequestBody String code) {
+        String response = sendEmail.verificCode(code);
+
+        return new ResponseEntity<>(Message.builder()
+                    .note("Code is valued succeful")
+                    .object(response)
+                    .build(),
+                    HttpStatus.OK);
     }
 }
