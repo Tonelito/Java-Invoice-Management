@@ -113,4 +113,15 @@
     <changeSet id="20240918-2" author="echamale">
         <renameTable oldTableName="user" newTableName="users"/>
     </changeSet>
+    
+    <changeSet id="20240930" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="varchar(255)"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(255)"/>
+    </changeSet>
+
+    <changeSet id="20240930-2" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="varchar(1000)"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(1000)"/>
+    </changeSet>
+
 </databaseChangeLog>

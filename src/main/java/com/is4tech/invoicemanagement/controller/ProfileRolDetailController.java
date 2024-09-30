@@ -3,6 +3,7 @@ package com.is4tech.invoicemanagement.controller;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -40,6 +41,7 @@ public class ProfileRolDetailController {
     private static final String NAME_ENTITY = "ProfileRolDetail";
 
     @PostMapping("/profile-rol-detail")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> saveProfileRolDetail(@RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException{
         ProfileRoleDetailDto profileRoleDetailDtoSave = null;
         try {
@@ -78,6 +80,7 @@ public class ProfileRolDetailController {
     }
 
     @DeleteMapping("/profile-rol-detail/{idProfile}/{idRol}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> deleteProfileRolDetail(@PathVariable Integer idProfile, @PathVariable Integer idRol) throws BadRequestException{
         try {
             profileRoleDetailService.deleteProfileRolDetailByIds(idProfile, idRol);
@@ -91,6 +94,7 @@ public class ProfileRolDetailController {
     }
 
     @GetMapping("/profile-rol-detail/{idProfile}/{idRol}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile, @PathVariable Integer idRol){
         ProfileRoleDetailId idBusqueda = ProfileRoleDetailId.builder().profileId(idProfile).roleId(idRol).build();
         ProfileRoleDetailDto profileRoleDetailDto = profileRoleDetailService.finByIdProfileRoleDetail(idBusqueda);
@@ -108,6 +112,7 @@ public class ProfileRolDetailController {
     }
 
     @GetMapping("/profile-rol-details")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable){
         List<ProfileRoleDetailDto> profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable);
         if(profileRolDetailsId.isEmpty())

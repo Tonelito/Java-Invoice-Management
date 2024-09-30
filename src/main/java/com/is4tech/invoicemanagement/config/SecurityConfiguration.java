@@ -37,7 +37,8 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/invoice-management/v0.1/auth/**").permitAll()
+                        .requestMatchers("/invoice-management/v0.1/auth/signup").permitAll()
+                        .requestMatchers("/invoice-management/v0.1/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/javainuse-openapi/**").permitAll()
                         .anyRequest().authenticated()
                 )

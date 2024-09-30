@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.controller;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import com.is4tech.invoicemanagement.dto.LoginDto;
 import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.model.User;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class AuthController {
     private final JwtService jwtService;
     private final AuthService authenticationService;
+    private static final String NAME_ENTITY = "Users";
 
     public AuthController(JwtService jwtService, AuthService authenticationService) {
         this.jwtService = jwtService;
@@ -45,14 +47,17 @@ public class AuthController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginDto loginDto) {
         User authenticatedUser = authenticationService.authenticate(loginDto);
 
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        Integer userId = authenticatedUser.getUserId();
+
+        String jwtToken = jwtService.generateToken(authenticatedUser, userId);
 
         LoginResponse loginResponse = new LoginResponse()
                 .setToken(jwtToken)
                 .setExpiresIn(jwtService.getExpirationTime())
                 .setAuthorities(authenticatedUser.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()))
+                .setUserId(userId);
 
         return ResponseEntity.ok(loginResponse);
     }

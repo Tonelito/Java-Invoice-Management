@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.controller;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class ProfileController {
   private static final String ID_ENTITY = "profile_id";
 
   @PostMapping("/profile")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
     Profile profileSave = null;
     try {
@@ -56,6 +58,7 @@ public class ProfileController {
   }
 
   @PutMapping("/profile/{id}")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Integer id){
     Profile profileUpdate = null;
     try {
@@ -80,6 +83,7 @@ public class ProfileController {
   }
 
   @DeleteMapping("/profile/{id}")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> deleteProfile(@PathVariable Integer id){
     try {
       Profile profileDelete = profileService.finByIdProfile(id);
@@ -94,6 +98,7 @@ public class ProfileController {
   }
 
   @GetMapping("/profile/{id}")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> showByIdProfile(@PathVariable Integer id){
     Profile profile = profileService.finByIdProfile(id);
     if(profile == null)
@@ -112,6 +117,7 @@ public class ProfileController {
   }
 
   @GetMapping("/profiles")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable){
     Page<Profile> profiles = profileService.listAllProfile(pageable);
     if(profiles.isEmpty())
