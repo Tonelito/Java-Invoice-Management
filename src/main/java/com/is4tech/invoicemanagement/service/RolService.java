@@ -1,7 +1,6 @@
 package com.is4tech.invoicemanagement.service;
 
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
@@ -17,14 +16,18 @@ public class RolService {
     
     //Autowired: Gives us control when injecting our instances
     @Autowired
-    private RolRepository rolRepository;
+    private final RolRepository rolRepository;
+
+    public RolService(RolRepository rolRepository) {
+        this.rolRepository = rolRepository;
+    }
 
     //Allows you to prevent the compiler from adding about:
     public Page<Rol> listAllRol(Pageable pageable){
         return rolRepository.findAll(pageable);
     }
     
-    //Transactional: Supports data transactionality
+    //Transactional: Supports data transactionality 
     //if you didn't have spring support
     @Transactional
     public Rol saveRol(RolDto rolDto){
@@ -37,7 +40,7 @@ public class RolService {
         return rolRepository.save(rol);
     }
 
-    //ReadOnly: Commonly used for search or
+    //ReadOnly: Commonly used for search or 
     //recovery so that it is read only
     @Transactional(readOnly = true)
     public Rol findByIdRol(Integer id){

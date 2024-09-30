@@ -113,7 +113,153 @@
     <changeSet id="20240918-2" author="echamale">
         <renameTable oldTableName="user" newTableName="users"/>
     </changeSet>
-    
+
+    <changeSet id="20240923-3" author="dalvarado">
+
+        <createTable tableName="status_invoice">
+            <column name="status_invoice_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="payment_method">
+            <column name="payment_method_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(75)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="Customer">
+            <column name="customer_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(75)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dpi" type="varchar(15)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="passport" type="varchar(18)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="nit" type="varchar(15)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address" type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true"/>
+        </createTable>
+
+        <createTable tableName="invoice">
+            <column name="invoice_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="creation_date" type="Datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="discount" type="decimal">
+                <constraints nullable="true"/>
+            </column>
+            <column name="subtotal" type="decimal">
+                <constraints nullable="true"/>
+            </column>
+            <column name="total" type="decimal">
+                <constraints nullable="true"/>
+            </column>
+            <column name="payment_method_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="customer_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status_invoice_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="invoice"
+                                baseColumnNames="payment_method_id"
+                                constraintName="FK_invoice_payment_method"
+                                referencedTableName="payment_method"
+                                referencedColumnNames="payment_method_id"/>
+        <addForeignKeyConstraint baseTableName="invoice"
+                                 baseColumnNames="invoice_id"
+                                 constraintName="FK_invoice_customer"
+                                 referencedTableName="customer"
+                                 referencedColumnNames="customer_id"/>
+        <addForeignKeyConstraint baseTableName="invoice"
+                                 baseColumnNames="invoice_id"
+                                 constraintName="FK_invoice_status_invoice"
+                                 referencedTableName="status_invoice"
+                                 referencedColumnNames="status_invoice_id"/>
+        <addForeignKeyConstraint baseTableName="invoice"
+                                 baseColumnNames="invoice_id"
+                                 constraintName="FK_invoice_user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+
+
+        <createTable tableName="detail_invoice_products">
+            <column name="invoice_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="name" type="varchar(75)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="price" type="decimal">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="detail_invoice_products"
+                                baseColumnNames="invoice_id"
+                                constraintName="FK_invoice_details_products"
+                                referencedTableName="invoice"
+                                referencedColumnNames="invoice_id"/>
+
+        <createTable tableName="products">
+            <column name="products_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="code" type="varchar(25)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="name" type="varchar(75)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="expiration_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="entry_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="stock" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20240926" author="dalvarado">
+        <createTable tableName="code_recovery">
+            <column name="code_recovery_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_code_recovery_id"/>
+            </column>
+            <column name="code" type="varchar(10)"/>
+            <column name="expiration_date" type="datetime"/>
+        </createTable>
+    </changeSet>
+
     <changeSet id="20240930" author="echamale">
         <modifyDataType tableName="audit" columnName="request" newDataType="varchar(255)"/>
         <modifyDataType tableName="audit" columnName="response" newDataType="varchar(255)"/>
@@ -122,6 +268,11 @@
     <changeSet id="20240930-2" author="echamale">
         <modifyDataType tableName="audit" columnName="request" newDataType="varchar(1000)"/>
         <modifyDataType tableName="audit" columnName="response" newDataType="varchar(1000)"/>
+    </changeSet>
+
+    <changeSet id="20240930-3" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="varchar(500)"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(100)"/>
     </changeSet>
 
 </databaseChangeLog>

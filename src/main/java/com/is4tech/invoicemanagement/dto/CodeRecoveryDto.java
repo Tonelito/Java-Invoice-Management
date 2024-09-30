@@ -1,6 +1,6 @@
 package com.is4tech.invoicemanagement.dto;
 
-import java.util.List;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProfileDto {
-  
-  private Integer profileId;
-  private String name;
-  private String description;
-  private Boolean status;
-  private List<Integer> rolsId;
-
+public class CodeRecoveryDto {
+    private Integer codeRecoveryId;
+    private String code;
+    private Date expirationDate;
 }

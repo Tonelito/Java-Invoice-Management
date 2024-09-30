@@ -13,12 +13,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProfileDto {
-  
+public class ProfileRolListDto {
+      
   private Integer profileId;
   private String name;
   private String description;
   private Boolean status;
-  private List<Integer> rolsId;
-
+  private List<RolDto> rolsId;
 }
