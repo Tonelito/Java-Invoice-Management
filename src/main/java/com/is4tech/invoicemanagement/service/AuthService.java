@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.service;
 
-import com.is4tech.invoicemanagement.dto.CodePasswordDto;
 import com.is4tech.invoicemanagement.dto.LoginDto;
 import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.model.Profile;
@@ -42,12 +41,6 @@ public class AuthService {
                                 ResetCodeGenerator.MINUSCULAS+
                                 ResetCodeGenerator.MAYUSCULAS+
                                 ResetCodeGenerator.NUMEROS,10); 
-        sendEmail.sendEmailPassword(
-                input.getEmail(),
-                "infoFactura@facturacio.fac.com", 
-                "Credentails",
-                "Your login credentials are: \nEmail = " + input.getEmail() +
-                "\nPassword = "+ passwordCode);
 
         user.setFullName(input.getFullName());
         user.setEmail(input.getEmail());
@@ -59,7 +52,16 @@ public class AuthService {
 
         user.setStatus(true);
 
-        return userRepository.save(user);
+        User userSave = userRepository.save(user);
+
+        sendEmail.sendEmailPassword(
+                input.getEmail(),
+                "infoFactura@facturacio.fac.com", 
+                "Credentails",
+                "Your login credentials are: \nEmail = " + input.getEmail() +
+                "\nPassword = "+ passwordCode);
+
+        return userSave;
     }
 
     public User authenticate(LoginDto input) {

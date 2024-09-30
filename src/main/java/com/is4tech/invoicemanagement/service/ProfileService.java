@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -13,8 +12,11 @@ import com.is4tech.invoicemanagement.repository.ProfileRespository;
 @Service
 public class ProfileService {
   
-  @Autowired
-  private ProfileRespository profileRespository;
+  private final ProfileRespository profileRespository;
+
+  public ProfileService(ProfileRespository profileRespository) {
+    this.profileRespository = profileRespository;
+  }
 
   public Page<Profile> listAllProfile(Pageable pageable){
     return profileRespository.findAll(pageable);
@@ -32,17 +34,31 @@ public class ProfileService {
   }
 
   @Transactional(readOnly = true)
-  public Profile finByIdProfile(Integer id){
-    return profileRespository.findById(id).orElse(null);
+  public ProfileDto finByIdProfile(Integer id){
+    return toDto(profileRespository.findById(id).orElse(null));
   }
 
   @Transactional
-  public void deleteProfile(Profile profile){
+  public void deleteProfile(ProfileDto profileDto){
+    Profile profile = Profile.builder()
+      .profileId(profileDto.getProfileId())
+      .name(profileDto.getName())
+      .description(profileDto.getDescription())
+      .build();
     profileRespository.delete(profile);
   }
 
   public boolean existById(Integer id){
     return profileRespository.existsById(id);
+  }
+
+  private ProfileDto toDto(Profile profile){
+    return ProfileDto.builder()
+      .profileId(profile.getProfileId())
+      .name(profile.getName())
+      .description(profile.getDescription())
+      .status(profile.getStatus())
+      .build();
   }
 
 }

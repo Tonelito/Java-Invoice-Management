@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.is4tech.invoicemanagement.dto.CodePasswordDto;
 import com.is4tech.invoicemanagement.dto.CodeRecoveryDto;
-import com.is4tech.invoicemanagement.service.AuthService;
 import com.is4tech.invoicemanagement.service.CodeRecoveryService;
 
 @Component
