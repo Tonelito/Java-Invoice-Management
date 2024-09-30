@@ -1,5 +1,7 @@
 package com.is4tech.invoicemanagement.service;
 
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import com.is4tech.invoicemanagement.repository.RolRepository;
 public class RolService {
     
     //Autowired: Gives us control when injecting our instances
+    @Autowired
     private final RolRepository rolRepository;
 
     public RolService(RolRepository rolRepository) {

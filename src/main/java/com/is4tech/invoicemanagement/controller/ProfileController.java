@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.controller;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,16 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.dto.ProfileRolListDto;
 import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDto;
@@ -54,7 +48,8 @@ public class ProfileController {
   private static final String ID_ENTITY = "profile_id";
 
   @PostMapping("/profile")
-  public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto) throws BadRequestException {
+  @AuditEntity(NAME_ENTITY)
+  public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
     Profile profileSave = null;
     try {
       profileDto.setStatus(true);
@@ -88,6 +83,7 @@ public class ProfileController {
   }
 
   @PutMapping("/profile/{id}")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Integer id){
     Profile profileUpdate = null;
     try {
@@ -120,7 +116,7 @@ public class ProfileController {
           profileUpdate.setStatus(false);
         }else
           profileUpdate.setStatus(true);
-          
+
         profileService.saveProfile(profileUpdate);
 
         return new ResponseEntity<>(Message.builder()
@@ -136,6 +132,7 @@ public class ProfileController {
   }
 
   @DeleteMapping("/profile/{id}")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> deleteProfile(@PathVariable Integer id){
     try {
       ProfileDto profileDelete = profileService.finByIdProfile(id);
@@ -150,6 +147,7 @@ public class ProfileController {
   }
 
   @GetMapping("/profile/{id}")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> showByIdProfile(@PathVariable Integer id){
     ProfileDto profileDto = profileService.finByIdProfile(id);
     if(profileDto == null)
@@ -168,6 +166,7 @@ public class ProfileController {
   }
 
   @GetMapping("/profiles")
+  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable){
     Page<Profile> profiles = profileService.listAllProfile(pageable);
     if(profiles.isEmpty())
@@ -196,7 +195,7 @@ public class ProfileController {
           .profileId(profileId)
           .roleId(rolId)
           .build();
-        
+
         if (!(profileRoleDetailService.existByIdProfileRolDetail(detailId))) {
             ProfileRoleDetailDtoId detailSave = ProfileRoleDetailDtoId.builder()
               .profileId(profileId)

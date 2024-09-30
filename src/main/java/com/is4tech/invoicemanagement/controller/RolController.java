@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.controller;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -28,15 +29,15 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/invoice-management/v0.1/")
 public class RolController {
-    
-    //Autowired: Gives us control when injecting our instances
-    @Autowired  
+
+    @Autowired
     private RolService rolService;
 
-    private static final String NAME_ENTITY = "Rol";
+    private static final String NAME_ENTITY = "Role";
     private static final String ID_ENTITY = "Id";
 
     @PostMapping("/rol")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException{
         Rol rolSave = null;
         try {
@@ -57,6 +58,7 @@ public class RolController {
     }
 
     @PutMapping("/rol/{id}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> updateRol(@RequestBody RolDto rolDto,@PathVariable Integer id) throws BadRequestException{
         Rol rolUpdate = null;
         try {
@@ -82,6 +84,7 @@ public class RolController {
     }
 
     @DeleteMapping("/rol/{id}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> deleteRol(@PathVariable Integer id) throws BadRequestException{
         try {
             Rol rolDelete = rolService.findByIdRol(id); 
@@ -96,6 +99,7 @@ public class RolController {
     }
 
     @GetMapping("/rol/{id}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdRol(@PathVariable Integer id){
         Rol rol = rolService.findByIdRol(id);
         if(rol == null)
@@ -114,6 +118,7 @@ public class RolController {
     }
 
     @GetMapping("/rols")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showAllRols(@PageableDefault(size = 10) Pageable pageable){
         Page<Rol> rols = rolService.listAllRol(pageable);
         if(rols.isEmpty())

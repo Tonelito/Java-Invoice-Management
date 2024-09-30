@@ -3,6 +3,7 @@ package com.is4tech.invoicemanagement.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -36,21 +37,21 @@ import jakarta.validation.Valid;
 public class ProfileRolDetailController {
 
     private static final String ID_ENTITY = "profile_rol_detail_id";
-    
+    private static final String NAME_ENTITY = "ProfileRolDetail";
+
     private final ProfileRoleDetailService profileRoleDetailService;
     private final ProfileService profileService;
     private final RolService rolService;
-    
+
     public ProfileRolDetailController(ProfileRoleDetailService profileRoleDetailService, ProfileService profileService,
-            RolService rolService) {
+                                      RolService rolService) {
         this.profileRoleDetailService = profileRoleDetailService;
         this.profileService = profileService;
         this.rolService = rolService;
     }
 
-    private static final String NAME_ENTITY = "ProfileRolDetail";
-
     @PostMapping("/profile-rol-detail")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> saveProfileRolDetail(@RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException {
         try {
             Integer profileId = profileRoleDetailDtoId.getProfileId();
@@ -66,15 +67,15 @@ public class ProfileRolDetailController {
             List<RolDto> rolsSaved = new ArrayList<>();
             for (Integer rolId : profileRoleDetailDtoId.getRols()) {
                 ProfileRoleDetailId detailId = ProfileRoleDetailId.builder()
-                                            .profileId(profileId)
-                                            .roleId(rolId)
-                                            .build();
-                
+                        .profileId(profileId)
+                        .roleId(rolId)
+                        .build();
+
                 if (!(profileRoleDetailService.existByIdProfileRolDetail(detailId))) {
                     ProfileRoleDetailDtoId detailSave = ProfileRoleDetailDtoId.builder()
-                                                        .profileId(profileId)
-                                                        .roleId(rolId)
-                                                        .build();
+                            .profileId(profileId)
+                            .roleId(rolId)
+                            .build();
                     profileRoleDetailService.saveProfileRoleDetail(detailSave);
                     RolDto rol = toRol(rolService.findByIdRol(rolId));
                     if (rol != null) {
@@ -83,15 +84,15 @@ public class ProfileRolDetailController {
                 }
             }
             ProfileRoleDetailDto profileRoleDetailResponse = ProfileRoleDetailDto.builder()
-                                                    .profile(profileDto)
-                                                    .roles(rolsSaved)
-                                                    .build();
+                    .profile(profileDto)
+                    .roles(rolsSaved)
+                    .build();
 
             return new ResponseEntity<>(Message.builder()
-                .note("Saved successfully")
-                .object(profileRoleDetailResponse)
-                .build(), HttpStatus.CREATED);
-            
+                    .note("Saved successfully")
+                    .object(profileRoleDetailResponse)
+                    .build(), HttpStatus.CREATED);
+
         } catch (DataAccessException e) {
             throw new BadRequestException("Error save record: " + e.getMessage());
         }
@@ -99,6 +100,7 @@ public class ProfileRolDetailController {
 
 
     @GetMapping("/profile-rol-detail/rols/{idProfile}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile) {
         List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(idProfile);
 
@@ -112,32 +114,33 @@ public class ProfileRolDetailController {
         }
 
         return new ResponseEntity<>(Message.builder()
-            .note("Record found")
-            .object(rols)
-            .build(),
-            HttpStatus.OK);
+                .note("Record found")
+                .object(rols)
+                .build(),
+                HttpStatus.OK);
     }
-    
+
 
     @GetMapping("/profile-rol-details")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable){
         List<ProfileRoleDetailDto> profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable);
         if(profileRolDetailsId.isEmpty())
             throw new ResourceNorFoundException(NAME_ENTITY);
 
         return new ResponseEntity<>(Message.builder()
-                            .note("Records found")
-                            .object(profileRolDetailsId)
-                            .build(),
-                            HttpStatus.OK);
+                .note("Records found")
+                .object(profileRolDetailsId)
+                .build(),
+                HttpStatus.OK);
     }
 
     private RolDto toRol(Rol rol) {
-      return RolDto.builder()
-        .rolId(rol.getRolId())
-        .name(rol.getName())
-        .description(rol.getDescription())
-        .status(rol.getStatus())
-        .build();
+        return RolDto.builder()
+                .rolId(rol.getRolId())
+                .name(rol.getName())
+                .description(rol.getDescription())
+                .status(rol.getStatus())
+                .build();
     }
 }

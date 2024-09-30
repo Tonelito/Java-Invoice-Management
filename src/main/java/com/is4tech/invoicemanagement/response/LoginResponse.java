@@ -6,6 +6,7 @@ public class LoginResponse {
     private String token;
     private long expiresIn;
     private List<String> authorities;
+    private Integer userId; // Agregar userId
 
     public String getToken() {
         return token;
@@ -31,6 +32,15 @@ public class LoginResponse {
 
     public LoginResponse setAuthorities(List<String> authorities) {
         this.authorities = authorities;
+        return this;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public LoginResponse setUserId(Integer userId) {
+        this.userId = userId;
         return this;
     }
 }

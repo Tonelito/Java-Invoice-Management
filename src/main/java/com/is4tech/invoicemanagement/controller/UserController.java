@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.controller;
 
+import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
@@ -20,7 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/invoice-management/vo.1/")
+@RequestMapping("/invoice-management/v0.1/")
 public class UserController {
 
     private final UserService userService;
@@ -37,6 +38,7 @@ public class UserController {
     private static final String ID_ENTITY = "user_id";
 
     @PostMapping("/user")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto) {
         String generatePassword = PasswordGenerator.generatePassword();
         userDto.setPassword(passwordEncoder.encode(generatePassword));
@@ -71,6 +73,7 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> updateUser(@PathVariable Integer id, @RequestBody @Valid UsersDto userDto) {
         User userUpdate = null;
         try {
@@ -99,6 +102,7 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> getUser(@PathVariable Integer id) {
         User user = userService.findByIdUser(id);
         if (user == null)
@@ -120,6 +124,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
+    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showAllUsers(
             @PageableDefault(size = 10) Pageable pageable) {
 

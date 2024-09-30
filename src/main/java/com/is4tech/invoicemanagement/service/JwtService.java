@@ -35,12 +35,13 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, Integer userId) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("authorities", userDetails.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
+        extraClaims.put("user_id", userId);
 
         return generateToken(extraClaims, userDetails);
     }
@@ -96,8 +97,8 @@ public class JwtService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> extractAuthorities(String token) {
+    public String extractUserId(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get("authorities", List.class);
+        return claims.get("user_id", String.class);
     }
 }

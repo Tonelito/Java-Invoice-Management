@@ -124,7 +124,7 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
-        
+
         <createTable tableName="payment_method">
             <column name="payment_method_id" type="int" autoIncrement="true">
                 <constraints nullable="true" primaryKey="true"/>
@@ -133,7 +133,7 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
-        
+
         <createTable tableName="Customer">
             <column name="customer_id" type="int" autoIncrement="true">
                 <constraints nullable="true" primaryKey="true"/>
@@ -155,7 +155,7 @@
             </column>
             <column name="status" type="boolean" defaultValue="true"/>
         </createTable>
-        
+
         <createTable tableName="invoice">
             <column name="invoice_id" type="int" autoIncrement="true">
                 <constraints nullable="true" primaryKey="true"/>
@@ -206,7 +206,7 @@
                                  referencedTableName="users"
                                  referencedColumnNames="user_id"/>
 
-        
+
         <createTable tableName="detail_invoice_products">
             <column name="invoice_id" type="int">
                 <constraints nullable="true"/>
@@ -223,7 +223,7 @@
                                 constraintName="FK_invoice_details_products"
                                 referencedTableName="invoice"
                                 referencedColumnNames="invoice_id"/>
-        
+
         <createTable tableName="products">
             <column name="products_id" type="int" autoIncrement="true">
                 <constraints nullable="true" primaryKey="true"/>
@@ -259,4 +259,20 @@
             <column name="expiration_date" type="datetime"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="20240930" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="varchar(255)"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(255)"/>
+    </changeSet>
+
+    <changeSet id="20240930-2" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="varchar(1000)"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(1000)"/>
+    </changeSet>
+
+    <changeSet id="20240930-3" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="varchar(500)"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(100)"/>
+    </changeSet>
+
 </databaseChangeLog>
