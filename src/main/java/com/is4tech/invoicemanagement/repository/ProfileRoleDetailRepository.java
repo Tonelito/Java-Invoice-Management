@@ -20,4 +20,7 @@ public interface ProfileRoleDetailRepository extends JpaRepository<ProfileRoleDe
     @Transactional
     @Query("select prd.id.roleId from ProfileRoleDetail prd where prd.id.profileId = :profileId")
     List<Integer> findByIdProfile(@Param("profileId") Integer profileId);
+
+    @Query("select prd from ProfileRoleDetail prd where prd.id.profileId = :profileId")
+    List<ProfileRoleDetail> findByIdProfileObject(@Param("profileId") Integer profileId);
 }

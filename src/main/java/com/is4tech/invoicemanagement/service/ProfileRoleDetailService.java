@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDto;
 import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDtoId;
+import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetail;
@@ -25,13 +26,18 @@ public class ProfileRoleDetailService {
     private static final String NAME_ENTITY_PROFILE = "Profile";
     private static final String NAME_ENTITY_ROL = "Rol";
     private static final String ID_ENTITY = "profile_rol_detail_id";
+    
+    private final ProfileRoleDetailRepository prdRespository;
+    private final ProfileService profileService;
+    private final RolService rolService;
+    
+    public ProfileRoleDetailService(ProfileRoleDetailRepository prdRespository, ProfileService profileService,
+            RolService rolService) {
+        this.prdRespository = prdRespository;
+        this.profileService = profileService;
+        this.rolService = rolService;
+    }
 
-    @Autowired
-    private ProfileRoleDetailRepository prdRespository;
-    @Autowired
-    private ProfileService profileService;
-    @Autowired
-    private RolService rolService;
 
     public List<ProfileRoleDetailDto> listAllProfileRolDetail(Pageable pageable) {
         List<ProfileRoleDetail> profileRoleDetails = prdRespository.findAll(pageable).stream().toList();
@@ -44,7 +50,12 @@ public class ProfileRoleDetailService {
 
         List<ProfileRoleDetailDto> profileRoleDetailDtos = new ArrayList<>();
         for (Map.Entry<Profile, List<Rol>> data : groupedProfileRoles.entrySet()) {
-            profileRoleDetailDtos.add(new ProfileRoleDetailDto(data.getKey(), data.getValue()));
+            ProfileDto profileDto = ProfileDto.builder()
+            .profileId(data.getKey().getProfileId())
+            .name(data.getKey().getName())
+            .description(data.getKey().getDescription())
+            .build();
+            profileRoleDetailDtos.add(new ProfileRoleDetailDto(profileDto, (data.getValue().stream().map(this::toRol).toList())));
         }
 
         return profileRoleDetailDtos;
@@ -57,9 +68,13 @@ public class ProfileRoleDetailService {
         } else if(!(rolService.existById(profileRoleDetailDtoId.getRoleId()))) {
             throw new ResourceNorFoundException(NAME_ENTITY_ROL, ID_ENTITY, profileRoleDetailDtoId.getRoleId().toString());
         }
-        Profile profile = profileService.finByIdProfile(profileRoleDetailDtoId.getProfileId());
+        ProfileDto profileDto = profileService.finByIdProfile(profileRoleDetailDtoId.getProfileId());
         Rol role = rolService.findByIdRol(profileRoleDetailDtoId.getRoleId());
-
+        Profile profile = Profile.builder()
+            .profileId(profileDto.getProfileId())
+            .name(profileDto.getName())
+            .description(profileDto.getDescription())
+            .build();
         ProfileRoleDetail profileRoleDetail = ProfileRoleDetail.builder()
             .id(ProfileRoleDetailId.builder()
                 .profileId(profileRoleDetailDtoId.getProfileId())
@@ -95,17 +110,44 @@ public class ProfileRoleDetailService {
         return rolsIdCopy;
     }
 
+    public List<ProfileRoleDetail> findByIdProfileRol(Integer profileId){
+        return prdRespository.findByIdProfileObject(profileId);
+    }
+
     private ProfileRoleDetailDto toDto(ProfileRoleDetail profileRoleDetail) {
-        return new ProfileRoleDetailDto(profileRoleDetail.getProfile(), new ArrayList<>());
+        ProfileDto profileDto = toDtoProfile(profileRoleDetail);
+        return new ProfileRoleDetailDto(profileDto, new ArrayList<>());
+    }
+
+    private ProfileDto toDtoProfile(ProfileRoleDetail profileRoleDetail){
+        return ProfileDto.builder()
+            .profileId(profileRoleDetail.getProfile().getProfileId())
+            .name(profileRoleDetail.getProfile().getName())
+            .description(profileRoleDetail.getProfile().getDescription())
+            .build();
     }
 
     private ProfileRoleDetailDto toDtoRols(ProfileRoleDetail profileRoleDetail) {
-        List<Rol> roles = new ArrayList<>();
-        roles.add(profileRoleDetail.getRole());
+        List<RolDto> roles = new ArrayList<>();
+        roles.add(toRol(profileRoleDetail.getRole()));
+        ProfileDto profileDto = ProfileDto.builder()
+            .profileId(profileRoleDetail.getProfile().getProfileId())
+            .name(profileRoleDetail.getProfile().getName())
+            .description(profileRoleDetail.getProfile().getDescription())
+            .build();
     
         return ProfileRoleDetailDto.builder()
-            .profile(profileRoleDetail.getProfile())
+            .profile(profileDto)
             .roles(roles)
+            .build();
+    }
+
+    private RolDto toRol(Rol rol) {
+        return RolDto.builder()
+            .rolId(rol.getRolId())
+            .name(rol.getName())
+            .description(rol.getDescription())
+            .status(rol.getStatus())
             .build();
     }
 }

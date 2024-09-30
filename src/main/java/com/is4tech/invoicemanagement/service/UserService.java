@@ -1,7 +1,9 @@
 package com.is4tech.invoicemanagement.service;
 
 import com.is4tech.invoicemanagement.dto.UsersDto;
+import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.User;
+import com.is4tech.invoicemanagement.repository.ProfileRespository;
 import com.is4tech.invoicemanagement.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ProfileRespository profileRespository;
 
     public Page<User> listAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
@@ -23,6 +27,8 @@ public class UserService {
 
     @Transactional
     public User saveUser(UsersDto usersDto) {
+        Profile profile = profileRespository.findById(usersDto.getProfileId())
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
         User user = User.builder()
                 .userId(usersDto.getUserId())
                 .fullName(usersDto.getFullName())
@@ -30,6 +36,7 @@ public class UserService {
                 .password(usersDto.getPassword())
                 .dateOfBirth(usersDto.getDateOfBirth())
                 .status(usersDto.getStatus())
+                .profile(profile)
                 .build();
         return userRepository.save(user);
     }

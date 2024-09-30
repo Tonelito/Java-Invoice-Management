@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.controller;
 
-import com.is4tech.invoicemanagement.dto.CodePasswordDto;
 import com.is4tech.invoicemanagement.dto.EmailDto;
 import com.is4tech.invoicemanagement.dto.LoginDto;
 import com.is4tech.invoicemanagement.dto.UserChangePasswordDto;

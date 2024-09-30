@@ -7,22 +7,31 @@ import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.service.UserService;
 import com.is4tech.invoicemanagement.utils.Message;
 import com.is4tech.invoicemanagement.utils.PasswordGenerator;
+import com.is4tech.invoicemanagement.utils.SendEmail;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/invoice-management/vo.1/")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final SendEmail sendEmail;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserController(UserService userService, SendEmail sendEmail, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.sendEmail = sendEmail;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     private static final String NAME_ENTITY = "Users";
     private static final String ID_ENTITY = "user_id";
@@ -30,11 +39,19 @@ public class UserController {
     @PostMapping("/user")
     public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto) {
         String generatePassword = PasswordGenerator.generatePassword();
-        userDto.setPassword(generatePassword);
+        userDto.setPassword(passwordEncoder.encode(generatePassword));
         User userSave = null;
-
         try {
+            userDto.setStatus(true);
             userSave = userService.saveUser(userDto);
+            if(userSave != null)
+                sendEmail.sendEmailPassword(
+                    userSave.getEmail(),
+                    "infoFactura@facturacio.fac.com", 
+                    "Credentails",
+                    "Your login credentials are: \nEmail = " + userSave.getEmail() +
+                    "\nPassword = "+ generatePassword);
+            
             return new ResponseEntity<>(Message.builder()
                     .note("Saved Successfully")
                     .object(UsersDto.builder()
