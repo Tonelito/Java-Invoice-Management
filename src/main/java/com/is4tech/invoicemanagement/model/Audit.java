@@ -1,5 +1,7 @@
 package com.is4tech.invoicemanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @ToString
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "audit")
 public class Audit {
 
@@ -38,7 +41,8 @@ public class Audit {
     @Column(name = "operation")
     private String operation;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 }

@@ -43,7 +43,7 @@ public class AuditInterceptor implements HandlerInterceptor {
 
                     AuditDto auditDto = new AuditDto();
                     auditDto.setEntity(entityName);
-                    auditDto.setDateTime(LocalDateTime.now());
+                    auditDto.setDatetime(LocalDateTime.now());
                     auditDto.setRequest(requestBody);
                     auditDto.setOperation(httpMethod);
                     auditDto.setUserId(getUserIdFromRequest(request));
