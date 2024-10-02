@@ -44,6 +44,7 @@ public class ProfileService {
       .profileId(profileDto.getProfileId())
       .name(profileDto.getName())
       .description(profileDto.getDescription())
+      .status(profileDto.getStatus())
       .build();
     profileRespository.delete(profile);
   }
