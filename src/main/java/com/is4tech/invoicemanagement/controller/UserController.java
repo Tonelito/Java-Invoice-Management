@@ -125,8 +125,7 @@ public class UserController {
 
     @GetMapping("/users")
     @AuditEntity(NAME_ENTITY)
-    public ResponseEntity<Message> showAllUsers(
-            @PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Message> showAllUsers(Pageable pageable) {
 
         Page<User> users = userService.listAllUsers(pageable);
         if (users.isEmpty())

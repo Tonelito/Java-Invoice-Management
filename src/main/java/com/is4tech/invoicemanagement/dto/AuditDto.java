@@ -17,7 +17,7 @@ public class AuditDto {
     private String request;
     private String response;
     private Float responseTime;
-    private LocalDateTime dateTime;
+    private LocalDateTime datetime;
     private String operation;
     private Integer userId;
 

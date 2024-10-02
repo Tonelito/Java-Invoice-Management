@@ -8,7 +8,13 @@ import com.is4tech.invoicemanagement.repository.AuditRepository;
 import com.is4tech.invoicemanagement.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +39,28 @@ public class AuditService {
         audit.setRequest(auditDto.getRequest());
         audit.setResponse(auditDto.getResponse());
         audit.setResponseTime(auditDto.getResponseTime());
-        audit.setDatetime(auditDto.getDateTime());
+        audit.setDatetime(auditDto.getDatetime());
         audit.setOperation(auditDto.getOperation());
         audit.setUser(user);
 
         auditRepository.save(audit);
+    }
+
+    @Transactional
+    public Page<AuditDto> findByEntityAndDate(String entity, LocalDate date, Pageable pageable) {
+        Page<Audit> auditsPage = auditRepository.findByEntityAndDate(entity, date, pageable);
+
+        return auditsPage.map(audit -> {
+            AuditDto dto = new AuditDto();
+            dto.setAuditId(audit.getAuditId());
+            dto.setEntity(audit.getEntity());
+            dto.setRequest(audit.getRequest());
+            dto.setResponse(audit.getResponse());
+            dto.setResponseTime(audit.getResponseTime());
+            dto.setDatetime(audit.getDatetime());
+            dto.setOperation(audit.getOperation());
+            dto.setUserId(audit.getUser().getUserId());
+            return dto;
+        });
     }
 }
