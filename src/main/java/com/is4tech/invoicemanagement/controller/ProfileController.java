@@ -152,15 +152,6 @@ public class ProfileController {
     try {
       if(profileService.existById(id)){
         ProfileDto profileDelete = profileService.finByIdProfile(id);
-        List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
-
-        List<Integer> rolsId = new ArrayList<>();
-        for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
-          rolsId.add(profilerRoleDetail.getRole().getRolId());
-        }
-        for (Integer rolsIdModific : rolsId) {
-          profileRoleDetailService.deleteProfileRolDetailByIds(id, rolsIdModific);
-        }
         profileService.deleteProfile(profileDelete);
       }else
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
@@ -178,14 +169,16 @@ public class ProfileController {
     ProfileDto profileDto = profileService.finByIdProfile(id);
     if (profileDto == null)
       throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+    List<RolDto> rols = getAllRols(id);
 
     return new ResponseEntity<>(Message.builder()
         .note("Record found")
-        .object(ProfileDto.builder()
+        .object(ProfileRolListDto.builder()
             .profileId(profileDto.getProfileId())
             .name(profileDto.getName())
             .description(profileDto.getDescription())
             .status(profileDto.getStatus())
+            .rolsId(rols)
             .build())
         .build(),
         HttpStatus.OK);
@@ -234,6 +227,18 @@ public class ProfileController {
         }
       }
     }
+  }
+
+  private List<RolDto> getAllRols(Integer id){
+    List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
+    if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
+        throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+    }
+    List<RolDto> rols = new ArrayList();
+    for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
+        rols.add(toRol(profilerRoleDetail.getRole()));
+    }
+    return rols;
   }
 
   private RolDto toRol(Rol rol) {

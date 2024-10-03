@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,12 +52,13 @@ public class ProfileRolDetailController {
     }
 
     @PostMapping("/profile-rol-detail")
-    @AuditEntity(NAME_ENTITY)
-    public ResponseEntity<Message> saveProfileRolDetail(@RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException {
+    public ResponseEntity<Message> saveProfileRolDetail(
+            @RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException {
         try {
             Integer profileId = profileRoleDetailDtoId.getProfileId();
             ProfileDto profileDto = profileService.finByIdProfile(profileId);
-            List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId, profileRoleDetailDtoId);
+            List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
+                    profileRoleDetailDtoId);
 
             if (!(rolsId.isEmpty())) {
                 for (Integer rolsIdModific : rolsId) {
@@ -98,7 +100,6 @@ public class ProfileRolDetailController {
         }
     }
 
-
     @GetMapping("/profile-rol-detail/rols/{idProfile}")
     @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile) {
@@ -120,12 +121,10 @@ public class ProfileRolDetailController {
                 HttpStatus.OK);
     }
 
-
     @GetMapping("/profile-rol-details")
-    @AuditEntity(NAME_ENTITY)
-    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable){
+    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable) {
         List<ProfileRoleDetailDto> profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable);
-        if(profileRolDetailsId.isEmpty())
+        if (profileRolDetailsId.isEmpty())
             throw new ResourceNorFoundException(NAME_ENTITY);
 
         return new ResponseEntity<>(Message.builder()
@@ -133,6 +132,29 @@ public class ProfileRolDetailController {
                 .object(profileRolDetailsId)
                 .build(),
                 HttpStatus.OK);
+    }
+
+    @DeleteMapping("/profile-rol-detail/{id}")
+    public ResponseEntity<Message> deleteProfileRolDetail(@PathVariable Integer id) throws BadRequestException {
+        try {
+            if(profileService.existById(id)){
+                List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
+                List<Integer> rolsId = new ArrayList<>();
+                for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
+                rolsId.add(profilerRoleDetail.getRole().getRolId());
+                }
+                for (Integer rolsIdModific : rolsId) {
+                profileRoleDetailService.deleteProfileRolDetailByIds(id, rolsIdModific);
+                }    
+                return new ResponseEntity<>(Message.builder()
+                    .object(null)
+                    .build(),
+                    HttpStatus.NO_CONTENT);
+            }else
+                throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+        } catch (DataAccessException e) {
+            throw new BadRequestException("Error deleting record: " + e.getMessage());
+        }
     }
 
     private RolDto toRol(Rol rol) {
