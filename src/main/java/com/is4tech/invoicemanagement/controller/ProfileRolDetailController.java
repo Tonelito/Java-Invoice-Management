@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,11 +37,11 @@ import jakarta.validation.Valid;
 public class ProfileRolDetailController {
 
     private static final String ID_ENTITY = "profile_rol_detail_id";
-    
+
     private final ProfileRoleDetailService profileRoleDetailService;
     private final ProfileService profileService;
     private final RolService rolService;
-    
+
     public ProfileRolDetailController(ProfileRoleDetailService profileRoleDetailService, ProfileService profileService,
             RolService rolService) {
         this.profileRoleDetailService = profileRoleDetailService;
@@ -51,11 +52,13 @@ public class ProfileRolDetailController {
     private static final String NAME_ENTITY = "ProfileRolDetail";
 
     @PostMapping("/profile-rol-detail")
-    public ResponseEntity<Message> saveProfileRolDetail(@RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException {
+    public ResponseEntity<Message> saveProfileRolDetail(
+            @RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException {
         try {
             Integer profileId = profileRoleDetailDtoId.getProfileId();
             ProfileDto profileDto = profileService.finByIdProfile(profileId);
-            List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId, profileRoleDetailDtoId);
+            List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
+                    profileRoleDetailDtoId);
 
             if (!(rolsId.isEmpty())) {
                 for (Integer rolsIdModific : rolsId) {
@@ -66,15 +69,15 @@ public class ProfileRolDetailController {
             List<RolDto> rolsSaved = new ArrayList<>();
             for (Integer rolId : profileRoleDetailDtoId.getRols()) {
                 ProfileRoleDetailId detailId = ProfileRoleDetailId.builder()
-                                            .profileId(profileId)
-                                            .roleId(rolId)
-                                            .build();
-                
+                        .profileId(profileId)
+                        .roleId(rolId)
+                        .build();
+
                 if (!(profileRoleDetailService.existByIdProfileRolDetail(detailId))) {
                     ProfileRoleDetailDtoId detailSave = ProfileRoleDetailDtoId.builder()
-                                                        .profileId(profileId)
-                                                        .roleId(rolId)
-                                                        .build();
+                            .profileId(profileId)
+                            .roleId(rolId)
+                            .build();
                     profileRoleDetailService.saveProfileRoleDetail(detailSave);
                     RolDto rol = toRol(rolService.findByIdRol(rolId));
                     if (rol != null) {
@@ -83,20 +86,19 @@ public class ProfileRolDetailController {
                 }
             }
             ProfileRoleDetailDto profileRoleDetailResponse = ProfileRoleDetailDto.builder()
-                                                    .profile(profileDto)
-                                                    .roles(rolsSaved)
-                                                    .build();
+                    .profile(profileDto)
+                    .roles(rolsSaved)
+                    .build();
 
             return new ResponseEntity<>(Message.builder()
-                .note("Saved successfully")
-                .object(profileRoleDetailResponse)
-                .build(), HttpStatus.CREATED);
-            
+                    .note("Saved successfully")
+                    .object(profileRoleDetailResponse)
+                    .build(), HttpStatus.CREATED);
+
         } catch (DataAccessException e) {
             throw new BadRequestException("Error save record: " + e.getMessage());
         }
     }
-
 
     @GetMapping("/profile-rol-detail/rols/{idProfile}")
     public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile) {
@@ -112,32 +114,54 @@ public class ProfileRolDetailController {
         }
 
         return new ResponseEntity<>(Message.builder()
-            .note("Record found")
-            .object(rols)
-            .build(),
-            HttpStatus.OK);
+                .note("Record found")
+                .object(rols)
+                .build(),
+                HttpStatus.OK);
     }
-    
 
     @GetMapping("/profile-rol-details")
-    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable){
+    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable) {
         List<ProfileRoleDetailDto> profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable);
-        if(profileRolDetailsId.isEmpty())
+        if (profileRolDetailsId.isEmpty())
             throw new ResourceNorFoundException(NAME_ENTITY);
 
         return new ResponseEntity<>(Message.builder()
-                            .note("Records found")
-                            .object(profileRolDetailsId)
-                            .build(),
-                            HttpStatus.OK);
+                .note("Records found")
+                .object(profileRolDetailsId)
+                .build(),
+                HttpStatus.OK);
+    }
+
+    @DeleteMapping("/profile-rol-detail/{id}")
+    public ResponseEntity<Message> deleteProfileRolDetail(@PathVariable Integer id) throws BadRequestException {
+        try {
+            if(profileService.existById(id)){
+                List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
+                List<Integer> rolsId = new ArrayList<>();
+                for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
+                rolsId.add(profilerRoleDetail.getRole().getRolId());
+                }
+                for (Integer rolsIdModific : rolsId) {
+                profileRoleDetailService.deleteProfileRolDetailByIds(id, rolsIdModific);
+                }    
+                return new ResponseEntity<>(Message.builder()
+                    .object(null)
+                    .build(),
+                    HttpStatus.NO_CONTENT);
+            }else
+                throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+        } catch (DataAccessException e) {
+            throw new BadRequestException("Error deleting record: " + e.getMessage());
+        }
     }
 
     private RolDto toRol(Rol rol) {
-      return RolDto.builder()
-        .rolId(rol.getRolId())
-        .name(rol.getName())
-        .description(rol.getDescription())
-        .status(rol.getStatus())
-        .build();
+        return RolDto.builder()
+                .rolId(rol.getRolId())
+                .name(rol.getName())
+                .description(rol.getDescription())
+                .status(rol.getStatus())
+                .build();
     }
 }
