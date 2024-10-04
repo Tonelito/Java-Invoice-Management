@@ -79,7 +79,7 @@ public class ProfileRolDetailController {
                             .roleId(rolId)
                             .build();
                     profileRoleDetailService.saveProfileRoleDetail(detailSave);
-                    RolDto rol = toRol(rolService.findByIdRol(rolId));
+                    RolDto rol = rolService.findByIdRol(rolId);
                     if (rol != null) {
                         rolsSaved.add(rol);
                     }

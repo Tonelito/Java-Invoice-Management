@@ -1,7 +1,9 @@
 package com.is4tech.invoicemanagement.service;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,19 +20,21 @@ public class ProfileService {
     this.profileRespository = profileRespository;
   }
 
-  public Page<Profile> listAllProfile(Pageable pageable){
-    return profileRespository.findAll(pageable);
+  public List<ProfileDto> listAllProfile(Pageable pageable){
+    return profileRespository.findAll(pageable).stream()
+      .map(this::toDto)
+      .toList();
   }
 
   @Transactional
-  public Profile saveProfile(ProfileDto profileDto){
+  public ProfileDto saveProfile(ProfileDto profileDto){
     Profile profile = Profile.builder()
                         .profileId(profileDto.getProfileId())
                         .name(profileDto.getName())
                         .description(profileDto.getDescription())
                         .status(profileDto.getStatus())
                         .build();
-    return profileRespository.save(profile);
+    return toDto(profileRespository.save(profile));
   }
 
   @Transactional(readOnly = true)
@@ -62,5 +66,4 @@ public class ProfileService {
       .status(profile.getStatus())
       .build();
   }
-
 }

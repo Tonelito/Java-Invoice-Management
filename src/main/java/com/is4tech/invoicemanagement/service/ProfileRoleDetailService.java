@@ -55,7 +55,7 @@ public class ProfileRoleDetailService {
             .name(data.getKey().getName())
             .description(data.getKey().getDescription())
             .build();
-            profileRoleDetailDtos.add(new ProfileRoleDetailDto(profileDto, (data.getValue().stream().map(this::toRol).toList())));
+            profileRoleDetailDtos.add(new ProfileRoleDetailDto(profileDto, (data.getValue().stream().map(this::toDtoRol).toList())));
         }
 
         return profileRoleDetailDtos;
@@ -68,13 +68,9 @@ public class ProfileRoleDetailService {
         } else if(!(rolService.existById(profileRoleDetailDtoId.getRoleId()))) {
             throw new ResourceNorFoundException(NAME_ENTITY_ROL, ID_ENTITY, profileRoleDetailDtoId.getRoleId().toString());
         }
-        ProfileDto profileDto = profileService.finByIdProfile(profileRoleDetailDtoId.getProfileId());
-        Rol role = rolService.findByIdRol(profileRoleDetailDtoId.getRoleId());
-        Profile profile = Profile.builder()
-            .profileId(profileDto.getProfileId())
-            .name(profileDto.getName())
-            .description(profileDto.getDescription())
-            .build();
+
+        Profile profile = toModelProfile(profileService.finByIdProfile(profileRoleDetailDtoId.getProfileId()));
+        Rol role = toModelRol(rolService.findByIdRol(profileRoleDetailDtoId.getRoleId()));
         ProfileRoleDetail profileRoleDetail = ProfileRoleDetail.builder()
             .id(ProfileRoleDetailId.builder()
                 .profileId(profileRoleDetailDtoId.getProfileId())
@@ -119,17 +115,9 @@ public class ProfileRoleDetailService {
         return new ProfileRoleDetailDto(profileDto, new ArrayList<>());
     }
 
-    private ProfileDto toDtoProfile(ProfileRoleDetail profileRoleDetail){
-        return ProfileDto.builder()
-            .profileId(profileRoleDetail.getProfile().getProfileId())
-            .name(profileRoleDetail.getProfile().getName())
-            .description(profileRoleDetail.getProfile().getDescription())
-            .build();
-    }
-
     private ProfileRoleDetailDto toDtoRols(ProfileRoleDetail profileRoleDetail) {
         List<RolDto> roles = new ArrayList<>();
-        roles.add(toRol(profileRoleDetail.getRole()));
+        roles.add(toDtoRol(profileRoleDetail.getRole()));
         ProfileDto profileDto = ProfileDto.builder()
             .profileId(profileRoleDetail.getProfile().getProfileId())
             .name(profileRoleDetail.getProfile().getName())
@@ -142,12 +130,37 @@ public class ProfileRoleDetailService {
             .build();
     }
 
-    private RolDto toRol(Rol rol) {
+    private RolDto toDtoRol(Rol rol) {
         return RolDto.builder()
             .rolId(rol.getRolId())
             .name(rol.getName())
             .description(rol.getDescription())
             .status(rol.getStatus())
+            .build();
+    }
+
+    private Rol toModelRol(RolDto rolDto) {
+        return Rol.builder()
+            .rolId(rolDto.getRolId())
+            .name(rolDto.getName())
+            .description(rolDto.getDescription())
+            .status(rolDto.getStatus())
+            .build();
+    }
+    
+    private ProfileDto toDtoProfile(ProfileRoleDetail profileRoleDetail){
+        return ProfileDto.builder()
+            .profileId(profileRoleDetail.getProfile().getProfileId())
+            .name(profileRoleDetail.getProfile().getName())
+            .description(profileRoleDetail.getProfile().getDescription())
+            .build();
+    }
+
+    private Profile toModelProfile(ProfileDto profileDto){
+        return Profile.builder()
+            .profileId(profileDto.getProfileId())
+            .name(profileDto.getName())
+            .description(profileDto.getDescription())
             .build();
     }
 }
