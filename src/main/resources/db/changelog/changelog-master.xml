@@ -270,4 +270,30 @@
         <modifyDataType tableName="audit" columnName="response" newDataType="varchar(100)"/>
     </changeSet>
 
+    <changeSet id="20241003-1" author="echamale">
+        <addColumn tableName="products">
+            <column name="delivery_time" type="int"/>
+            <column name="company_or_brand_name" type="varchar(75)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20241003-2" author="echamale">
+        <addColumn tableName="products">
+            <column name="price" type="double"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20241004-1" author="echamale">
+        <modifyDataType tableName="audit" columnName="request" newDataType="text"/>
+        <modifyDataType tableName="audit" columnName="response" newDataType="varchar(10)"/>
+        <renameColumn tableName="audit" oldColumnName="response" newColumnName="status-code"/>
+        <addColumn tableName="audit">
+            <column name="error_message" type="text"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20241004-2" author="echamale">
+        <renameColumn tableName="audit" oldColumnName="status-code" newColumnName="status_code"/>
+        <modifyDataType tableName="audit" columnName="status_code" newDataType="int"/>
+    </changeSet>
 </databaseChangeLog>

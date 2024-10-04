@@ -3,7 +3,6 @@ package com.is4tech.invoicemanagement.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -101,7 +100,6 @@ public class ProfileRolDetailController {
     }
 
     @GetMapping("/profile-rol-detail/rols/{idProfile}")
-    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile) {
         List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(idProfile);
 

@@ -1,7 +1,5 @@
 package com.is4tech.invoicemanagement.controller;
 
-import com.is4tech.invoicemanagement.annotation.AuditEntity;
-
 import java.util.List;
 
 import org.apache.coyote.BadRequestException;
@@ -9,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.is4tech.invoicemanagement.model.Rol;
 import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.service.RolService;
@@ -40,15 +36,14 @@ public class RolController {
     private static final String ID_ENTITY = "Id";
 
     @PostMapping("/rol")
-    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException {
         try {
             RolDto rolSave = rolService.saveRol(rolDto);
             return new ResponseEntity<>(Message.builder()
-                .note("Saved successfully")
-                .object(rolSave)
-                .build(),
-                HttpStatus.CREATED);
+                    .note("Saved successfully")
+                    .object(rolSave)
+                    .build(),
+                    HttpStatus.CREATED);
         } catch (DataAccessException exDt) {
             throw new BadRequestException("Error saving record: " + exDt.getMessage());
         }
@@ -56,7 +51,6 @@ public class RolController {
 
 
     @PutMapping("/rol/{id}")
-    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> updateRol(@RequestBody RolDto rolDto,@PathVariable Integer id) throws BadRequestException{
         RolDto rolUpdate = null;
         try {
@@ -64,58 +58,55 @@ public class RolController {
                 rolDto.setRolId(id);
                 rolUpdate = rolService.saveRol(rolDto);
                 return new ResponseEntity<>(Message.builder()
-                    .note("Update successfully")
-                    .object(rolUpdate)
-                    .build(),
-                    HttpStatus.OK);
+                        .note("Update successfully")
+                        .object(rolUpdate)
+                        .build(),
+                        HttpStatus.OK);
             } else
                 throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
-            
+
         } catch (DataAccessException exDt) {
             throw new BadRequestException("Error update record: " + exDt.getMessage());
         }
     }
 
     @DeleteMapping("/rol/{id}")
-    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> deleteRol(@PathVariable Integer id) throws BadRequestException{
         try {
-            RolDto rolDelete = rolService.findByIdRol(id); 
+            RolDto rolDelete = rolService.findByIdRol(id);
             rolService.deleteRol(rolDelete);
             return new ResponseEntity<>(Message.builder()
-                                        .object(null)
-                                        .build(), 
-                                        HttpStatus.NO_CONTENT);
+                    .object(null)
+                    .build(),
+                    HttpStatus.NO_CONTENT);
         } catch (DataAccessException e) {
             throw new BadRequestException("Error deleting record: " + e.getMessage());
         }
     }
 
     @GetMapping("/rol/{id}")
-    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdRol(@PathVariable Integer id){
         RolDto rolDto = rolService.findByIdRol(id);
         if(rolDto == null)
             throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
 
         return new ResponseEntity<>(Message.builder()
-                                        .note("Record found")
-                                        .object(rolDto)
-                                        .build(),
-                                        HttpStatus.NOT_FOUND);
+                .note("Record found")
+                .object(rolDto)
+                .build(),
+                HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/rols")
-    @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showAllRols(@PageableDefault(size = 10) Pageable pageable){
         List<RolDto> rols = rolService.listAllRol(pageable);
         if(rols.isEmpty())
             throw new ResourceNorFoundException(NAME_ENTITY);
 
         return new ResponseEntity<>(Message.builder()
-                                    .note("Records found")
-                                    .object(rols)
-                                    .build(),
-                                    HttpStatus.OK);
+                .note("Records found")
+                .object(rols)
+                .build(),
+                HttpStatus.OK);
     }
 }

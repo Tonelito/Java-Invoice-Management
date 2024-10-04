@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

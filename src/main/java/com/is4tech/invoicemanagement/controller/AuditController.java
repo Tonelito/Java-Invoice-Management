@@ -17,13 +17,17 @@ public class AuditController {
     private AuditService auditService;
 
     @PostMapping("/search")
-    public ResponseEntity<Page<AuditDto>> findByEntityAndDate(
+    public ResponseEntity<Page<AuditDto>> findByEntityAndDateRange(
             @RequestBody AuditSearchDto auditSearchDto,
             Pageable pageable) {
 
-        Page<AuditDto> audits = auditService.findByEntityAndDate(auditSearchDto.getEntity(), auditSearchDto.getDate(), pageable);
+        Page<AuditDto> audits = auditService.findByEntityAndDateRangeAndOptionalUserId(
+                auditSearchDto.getEntity(),
+                auditSearchDto.getStartDate(),
+                auditSearchDto.getEndDate(),
+                auditSearchDto.getUserId(),
+                pageable);
 
         return ResponseEntity.ok(audits);
     }
-
 }

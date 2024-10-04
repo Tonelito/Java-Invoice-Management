@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.controller;
 
-import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +45,6 @@ public class ProfileController {
   private static final String ID_ENTITY = "profile_id";
 
   @PostMapping("/profile")
-  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
     ProfileDto profileSave = null;
     try {
