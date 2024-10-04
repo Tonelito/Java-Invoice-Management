@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.controller;
 
-import com.is4tech.invoicemanagement.annotation.AuditEntity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,12 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.dto.ProfileRolListDto;
-import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDto;
 import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDtoId;
 import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
-import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetail;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetailId;
 import com.is4tech.invoicemanagement.model.Rol;
@@ -50,7 +47,6 @@ public class ProfileController {
   private static final String ID_ENTITY = "profile_id";
 
   @PostMapping("/profile")
-  @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
     Profile profileSave = null;
     try {

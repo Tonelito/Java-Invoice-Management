@@ -4,7 +4,6 @@ import com.is4tech.invoicemanagement.dto.AuditDto;
 import com.is4tech.invoicemanagement.dto.AuditSearchDto;
 import com.is4tech.invoicemanagement.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +17,17 @@ public class AuditController {
     private AuditService auditService;
 
     @PostMapping("/search")
-    public ResponseEntity<Page<AuditDto>> findByEntityAndDate(
+    public ResponseEntity<Page<AuditDto>> findByEntityAndDateRange(
             @RequestBody AuditSearchDto auditSearchDto,
             Pageable pageable) {
 
-        Page<AuditDto> audits = auditService.findByEntityAndDate(auditSearchDto.getEntity(), auditSearchDto.getDate(), pageable);
+        Page<AuditDto> audits = auditService.findByEntityAndDateRangeAndOptionalUserId(
+                auditSearchDto.getEntity(),
+                auditSearchDto.getStartDate(),
+                auditSearchDto.getEndDate(),
+                auditSearchDto.getUserId(),
+                pageable);
 
         return ResponseEntity.ok(audits);
     }
-
 }

@@ -29,8 +29,11 @@ public class Audit {
     @Column(name = "request")
     private String request;
 
-    @Column(name = "response")
-    private String response;
+    @Column(name = "status_code")
+    private Integer statusCode;
+
+    @Column(name = "error_message")
+    private String errorMessage;
 
     @Column(name = "response_time")
     private Float responseTime;

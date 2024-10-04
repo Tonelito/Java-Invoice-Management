@@ -8,9 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface AuditRepository extends JpaRepository<Audit, Integer> {
-    @Query("SELECT a FROM Audit a WHERE a.entity = :entity AND DATE(a.datetime) = :date")
-    Page<Audit> findByEntityAndDate(@Param("entity") String entity, @Param("date") LocalDate date, Pageable pageable);
+    @Query("SELECT a FROM Audit a WHERE a.entity = :entity AND DATE(a.datetime) BETWEEN :startDate AND :endDate"
+            + " AND (:userId IS NULL OR a.user.id = :userId)")
+    Page<Audit> findByEntityAndDateRangeAndOptionalUserId(@Param("entity") String entity,
+                                                          @Param("startDate") LocalDate startDate,
+                                                          @Param("endDate") LocalDate endDate,
+                                                          @Param("userId") Integer userId,
+                                                          Pageable pageable);
+
 }

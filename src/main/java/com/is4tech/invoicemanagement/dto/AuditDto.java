@@ -15,10 +15,12 @@ public class AuditDto {
     private Integer auditId;
     private String entity;
     private String request;
-    private String response;
+    private Integer statusCode;
+    private String errorMessage;
     private Float responseTime;
     private LocalDateTime datetime;
     private String operation;
     private Integer userId;
+    private String fullName;
 
 }

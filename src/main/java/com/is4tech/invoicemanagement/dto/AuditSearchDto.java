@@ -11,5 +11,7 @@ import java.time.LocalDate;
 @Builder
 public class AuditSearchDto {
     private String entity;
-    private LocalDate date;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private Integer userId;
 }
