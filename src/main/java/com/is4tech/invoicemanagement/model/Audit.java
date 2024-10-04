@@ -35,9 +35,6 @@ public class Audit {
     @Column(name = "error_message")
     private String errorMessage;
 
-    @Column(name = "response_time")
-    private Float responseTime;
-
     @Column(name = "datetime")
     private LocalDateTime datetime;
 

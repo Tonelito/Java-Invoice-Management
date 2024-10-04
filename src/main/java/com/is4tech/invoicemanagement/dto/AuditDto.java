@@ -17,7 +17,6 @@ public class AuditDto {
     private String request;
     private Integer statusCode;
     private String errorMessage;
-    private Float responseTime;
     private LocalDateTime datetime;
     private String operation;
     private Integer userId;

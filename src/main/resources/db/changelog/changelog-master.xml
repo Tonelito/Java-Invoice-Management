@@ -296,4 +296,8 @@
         <renameColumn tableName="audit" oldColumnName="status-code" newColumnName="status_code"/>
         <modifyDataType tableName="audit" columnName="status_code" newDataType="int"/>
     </changeSet>
+
+    <changeSet id="20241004-3" author="echamale">
+        <dropColumn tableName="audit" columnName="response_time"/>
+    </changeSet>
 </databaseChangeLog>

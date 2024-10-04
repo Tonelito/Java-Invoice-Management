@@ -38,10 +38,7 @@ public class AuditService {
     }
 
     public void logAudit(Object object, Method method, Exception ex, int statusCode, String entity, HttpServletRequest request) {
-        logger.info("Audit log: object={}", object);
         AuditDto auditDto = new AuditDto();
-        long startTime = System.currentTimeMillis();
-        float responseTime = (float) (System.currentTimeMillis() - startTime) / 1000;
 
         Integer userId = null;
         String token = request.getHeader("Authorization");
@@ -50,7 +47,6 @@ public class AuditService {
             userId = jwtUtil.extractUserId(token).intValue();
         }
 
-        auditDto.setResponseTime(responseTime);
         auditDto.setStatusCode(statusCode);
         auditDto.setDatetime(LocalDateTime.now());
         auditDto.setOperation(request.getMethod());
@@ -78,7 +74,6 @@ public class AuditService {
         audit.setRequest(auditDto.getRequest());
         audit.setStatusCode(auditDto.getStatusCode());
         audit.setErrorMessage(auditDto.getErrorMessage());
-        audit.setResponseTime(auditDto.getResponseTime());
         audit.setDatetime(auditDto.getDatetime());
         audit.setOperation(auditDto.getOperation());
         audit.setUser(user);
@@ -97,7 +92,6 @@ public class AuditService {
             dto.setRequest(audit.getRequest());
             dto.setStatusCode(audit.getStatusCode());
             dto.setErrorMessage(audit.getErrorMessage());
-            dto.setResponseTime(audit.getResponseTime());
             dto.setDatetime(audit.getDatetime());
             dto.setOperation(audit.getOperation());
             dto.setUserId(audit.getUser().getUserId());
