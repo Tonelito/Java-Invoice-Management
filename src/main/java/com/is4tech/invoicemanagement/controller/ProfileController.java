@@ -5,22 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.dto.ProfileRolListDto;
-import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDto;
 import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDtoId;
 import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
-import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetail;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetailId;
 import com.is4tech.invoicemanagement.model.Rol;
@@ -52,21 +48,12 @@ public class ProfileController {
   @PostMapping("/profile")
   @AuditEntity(NAME_ENTITY)
   public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
-    Profile profileSave = null;
+    ProfileDto profileSave = null;
     try {
       profileDto.setStatus(true);
       profileSave = profileService.saveProfile(profileDto);
-
-      ProfileRoleDetailDtoId profileRoleDetailDtoId = ProfileRoleDetailDtoId.builder()
-          .profileId(profileSave.getProfileId())
-          .rols(profileDto.getRolsId())
-          .build();
-
-      List<RolDto> rols = new ArrayList();
-      for (Integer roldId : profileDto.getRolsId()) {
-        savedRolId(profileRoleDetailDtoId);
-        rols.add(toRol(rolService.findByIdRol(roldId)));
-      }
+      
+      List<RolDto> rols = savedRols(profileDto, profileSave.getProfileId());
 
       return new ResponseEntity<>(Message.builder()
           .note("Saved successfully")
@@ -86,7 +73,7 @@ public class ProfileController {
 
   @PutMapping("/profile/{id}")
   public ResponseEntity<Message> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Integer id) {
-    Profile profileUpdate = null;
+    ProfileDto profileUpdate = null;
     try {
       if (profileService.existById(id)) {
         profileDto.setProfileId(id);
@@ -94,16 +81,7 @@ public class ProfileController {
 
         profileUpdate = profileService.saveProfile(profileDto);
 
-        ProfileRoleDetailDtoId profileRoleDetailDtoId = ProfileRoleDetailDtoId.builder()
-            .profileId(id)
-            .rols(profileDto.getRolsId())
-            .build();
-
-        List<RolDto> rols = new ArrayList();
-        for (Integer roldId : profileDto.getRolsId()) {
-          savedRolId(profileRoleDetailDtoId);
-          rols.add(toRol(rolService.findByIdRol(roldId)));
-        }
+        List<RolDto> rols = savedRols(profileDto, id);
 
         return new ResponseEntity<>(Message.builder()
             .note("Update successfully")
@@ -186,15 +164,29 @@ public class ProfileController {
 
   @GetMapping("/profiles")
   public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable) {
-    Page<Profile> profiles = profileService.listAllProfile(pageable);
+    List<ProfileDto> profiles = profileService.listAllProfile(pageable);
     if (profiles.isEmpty())
       throw new ResourceNorFoundException(NAME_ENTITY);
 
     return new ResponseEntity<>(Message.builder()
         .note("Records found")
-        .object(profiles.getContent())
+        .object(profiles)
         .build(),
         HttpStatus.OK);
+  }
+
+  private List<RolDto> savedRols(ProfileDto profileDto, Integer id){
+    ProfileRoleDetailDtoId profileRoleDetailDtoId = ProfileRoleDetailDtoId.builder()
+      .profileId(id)
+      .rols(profileDto.getRolsId())
+      .build();
+
+    List<RolDto> rols = new ArrayList();
+    for (Integer roldId : profileDto.getRolsId()) {
+      savedRolId(profileRoleDetailDtoId);
+      rols.add(rolService.findByIdRol(roldId));
+    }
+    return rols;
   }
 
   private void savedRolId(ProfileRoleDetailDtoId profileRoleDetailDtoId) {
@@ -221,7 +213,7 @@ public class ProfileController {
             .roleId(rolId)
             .build();
         profileRoleDetailService.saveProfileRoleDetail(detailSave);
-        RolDto rol = toRol(rolService.findByIdRol(rolId));
+        RolDto rol = rolService.findByIdRol(rolId);
         if (rol != null) {
           rolsSaved.add(rol);
         }

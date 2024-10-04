@@ -208,8 +208,8 @@
 
 
         <createTable tableName="detail_invoice_products">
-            <column name="invoice_id" type="int">
-                <constraints nullable="true"/>
+            <column name="detail_invoice_products_id" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
             </column>
             <column name="name" type="varchar(75)">
                 <constraints nullable="true"/>
@@ -218,11 +218,6 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
-        <addForeignKeyConstraint baseTableName="detail_invoice_products"
-                                baseColumnNames="invoice_id"
-                                constraintName="FK_invoice_details_products"
-                                referencedTableName="invoice"
-                                referencedColumnNames="invoice_id"/>
 
         <createTable tableName="products">
             <column name="products_id" type="int" autoIncrement="true">

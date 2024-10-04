@@ -10,24 +10,26 @@ import org.springframework.web.context.request.WebRequest;
 
 import com.is4tech.invoicemanagement.utils.ApiResponse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handlerMethodArgumentNotValidException(MethodArgumentNotValidException exception,
             WebRequest webRequest) {
-        Map<String, String> mapErrors = new HashMap<>();
+
+        StringBuilder message = new StringBuilder("No puedes dejar datos vacíos:  ");
+
         exception.getBindingResult().getAllErrors().forEach(error -> {
-            String clave = ((FieldError) error).getField();
-            String valor = error.getDefaultMessage();
-            mapErrors.put(clave, valor);
+            String field = ((FieldError) error).getField();
+            message.append(field).append(" is required, ");
         });
-        ApiResponse apiResponse = new ApiResponse(mapErrors.toString(), webRequest.getDescription(false));
+
+        ApiResponse apiResponse = new ApiResponse(message.toString(), webRequest.getDescription(false));
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+
+
+
 
     @ExceptionHandler(ResourceNorFoundException.class)
     public ResponseEntity<ApiResponse> handlerResourceNotFoundException(ResourceNorFoundException exception,

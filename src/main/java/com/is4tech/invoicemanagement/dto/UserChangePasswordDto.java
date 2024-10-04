@@ -2,7 +2,7 @@ package com.is4tech.invoicemanagement.dto;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,10 +16,12 @@ import lombok.Setter;
 @Builder
 public class UserChangePasswordDto {
     
-    @NotBlank(message = "El correo electrónico es obligatorio")
-    @Email(message = "El correo electrónico debe ser válido")
+    @NotEmpty(message = "Email is required")
+    @Email(message = "Email must be valid")
     @Column(unique = true)
     private String email;
+    @NotEmpty(message = "New Password is required")
     private String newPassword;
+    @NotEmpty(message = "Old password is required")
     private String password;
 }

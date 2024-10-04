@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface AuditRepository extends JpaRepository<Audit, Integer> {
     @Query("SELECT a FROM Audit a WHERE a.entity = :entity AND DATE(a.datetime) = :date")

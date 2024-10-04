@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.is4tech.invoicemanagement.dto.CodeRecoveryDto;
@@ -10,8 +9,11 @@ import com.is4tech.invoicemanagement.repository.CodeRecoveryRepository;
 @Service
 public class CodeRecoveryService {
     
-    @Autowired
     private CodeRecoveryRepository codeRecoveryRepository;
+
+    public CodeRecoveryService(CodeRecoveryRepository codeRecoveryRepository) {
+        this.codeRecoveryRepository = codeRecoveryRepository;
+    }
 
     public CodeRecoveryDto findByCodeCodeRecovery(String code){
         CodeRecovery codeRecovery = codeRecoveryRepository.findByCode(code);

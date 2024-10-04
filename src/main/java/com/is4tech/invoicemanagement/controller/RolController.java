@@ -1,6 +1,9 @@
 package com.is4tech.invoicemanagement.controller;
 
 import com.is4tech.invoicemanagement.annotation.AuditEntity;
+
+import java.util.List;
+
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -38,41 +41,31 @@ public class RolController {
 
     @PostMapping("/rol")
     @AuditEntity(NAME_ENTITY)
-    public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException{
-        Rol rolSave = null;
+    public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException {
         try {
-            rolSave = rolService.saveRol(rolDto);
+            RolDto rolSave = rolService.saveRol(rolDto);
             return new ResponseEntity<>(Message.builder()
                 .note("Saved successfully")
-                .object(RolDto.builder()
-                        .rolId(rolSave.getRolId())
-                        .description(rolSave.getDescription())
-                        .name(rolSave.getName())
-                        .status(rolSave.getStatus())
-                        .build())
+                .object(rolSave)
                 .build(),
                 HttpStatus.CREATED);
         } catch (DataAccessException exDt) {
-            throw new BadRequestException("Error save record: " + exDt.getMessage());
+            throw new BadRequestException("Error saving record: " + exDt.getMessage());
         }
     }
+
 
     @PutMapping("/rol/{id}")
     @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> updateRol(@RequestBody RolDto rolDto,@PathVariable Integer id) throws BadRequestException{
-        Rol rolUpdate = null;
+        RolDto rolUpdate = null;
         try {
             if(rolService.existById(id)){
                 rolDto.setRolId(id);
                 rolUpdate = rolService.saveRol(rolDto);
                 return new ResponseEntity<>(Message.builder()
                     .note("Update successfully")
-                    .object(RolDto.builder()
-                            .rolId(rolUpdate.getRolId())
-                            .description(rolUpdate.getDescription())
-                            .name(rolUpdate.getName())
-                            .status(rolUpdate.getStatus())
-                            .build())
+                    .object(rolUpdate)
                     .build(),
                     HttpStatus.OK);
             } else
@@ -87,7 +80,7 @@ public class RolController {
     @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> deleteRol(@PathVariable Integer id) throws BadRequestException{
         try {
-            Rol rolDelete = rolService.findByIdRol(id); 
+            RolDto rolDelete = rolService.findByIdRol(id); 
             rolService.deleteRol(rolDelete);
             return new ResponseEntity<>(Message.builder()
                                         .object(null)
@@ -101,18 +94,13 @@ public class RolController {
     @GetMapping("/rol/{id}")
     @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showByIdRol(@PathVariable Integer id){
-        Rol rol = rolService.findByIdRol(id);
-        if(rol == null)
+        RolDto rolDto = rolService.findByIdRol(id);
+        if(rolDto == null)
             throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
 
         return new ResponseEntity<>(Message.builder()
                                         .note("Record found")
-                                        .object(RolDto.builder()
-                                                .rolId(rol.getRolId())
-                                                .name(rol.getName())
-                                                .description(rol.getDescription())
-                                                .status(rol.getStatus())
-                                                .build())
+                                        .object(rolDto)
                                         .build(),
                                         HttpStatus.NOT_FOUND);
     }
@@ -120,13 +108,13 @@ public class RolController {
     @GetMapping("/rols")
     @AuditEntity(NAME_ENTITY)
     public ResponseEntity<Message> showAllRols(@PageableDefault(size = 10) Pageable pageable){
-        Page<Rol> rols = rolService.listAllRol(pageable);
+        List<RolDto> rols = rolService.listAllRol(pageable);
         if(rols.isEmpty())
             throw new ResourceNorFoundException(NAME_ENTITY);
 
         return new ResponseEntity<>(Message.builder()
                                     .note("Records found")
-                                    .object(rols.getContent())
+                                    .object(rols)
                                     .build(),
                                     HttpStatus.OK);
     }

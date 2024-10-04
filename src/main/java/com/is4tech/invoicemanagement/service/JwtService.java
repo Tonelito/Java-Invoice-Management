@@ -13,7 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -96,7 +95,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    @SuppressWarnings("unchecked")
     public String extractUserId(String token) {
         Claims claims = extractAllClaims(token);
         return claims.get("user_id", String.class);
