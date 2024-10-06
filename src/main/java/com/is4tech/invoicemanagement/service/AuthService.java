@@ -8,6 +8,9 @@ import com.is4tech.invoicemanagement.repository.ProfileRespository;
 import com.is4tech.invoicemanagement.repository.AuthRepository;
 import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
 import com.is4tech.invoicemanagement.utils.SendEmail;
+
+import jakarta.mail.MessagingException;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +38,7 @@ public class AuthService {
         this.sendEmail = sendEmail;
     }
 
-    public User signup(UsersDto input) {
+    public User signup(UsersDto input) throws MessagingException {
         User user = new User();
         String passwordCode = ResetCodeGenerator.getPassword(
                                 ResetCodeGenerator.MINUSCULAS+
@@ -52,15 +55,14 @@ public class AuthService {
 
         user.setStatus(true);
 
-        User userSave = userRepository.save(user);
-
+        //User userSave = userRepository.save(user);
         sendEmail.sendEmailPassword(
                 input.getEmail(),
                 "infoFactura@facturacio.fac.com", 
                 "Credentails",
-                "Your login credentials are: \nEmail = " + input.getEmail() +
-                "\nPassword = "+ passwordCode);
-
+                passwordCode);
+                
+        User userSave = User.builder().fullName(user.getFullName()).build();
         return userSave;
     }
 

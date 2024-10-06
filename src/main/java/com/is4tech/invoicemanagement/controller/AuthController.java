@@ -14,6 +14,8 @@ import com.is4tech.invoicemanagement.utils.SendEmail;
 
 import com.is4tech.invoicemanagement.service.AuthService;
 import com.is4tech.invoicemanagement.utils.PasswordGenerator;
+
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -43,7 +45,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) {
+    public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) throws MessagingException {
         String generatePassword = PasswordGenerator.generatePassword();
 
         usersDto.setPassword(generatePassword);
@@ -87,8 +89,7 @@ public class AuthController {
                 "infoFactura@facturacio.fac.com",
                 "Recovery Password",
                 "Your recovery code is: \n" + passwordCode,
-                passwordCode,
-                emailDto.getEmail()
+                passwordCode
         );
 
         return new ResponseEntity<>(Message.builder()
