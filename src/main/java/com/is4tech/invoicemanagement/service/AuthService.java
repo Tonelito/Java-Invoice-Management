@@ -61,7 +61,6 @@ public class AuthService {
                 "infoFactura@facturacio.fac.com", 
                 "Credentails",
                 passwordCode);
-                
         User userSave = User.builder().fullName(user.getFullName()).build();
         return userSave;
     }

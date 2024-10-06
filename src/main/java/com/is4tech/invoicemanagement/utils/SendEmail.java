@@ -47,7 +47,7 @@ public class SendEmail {
     mail.send(emailMessage);
 
     CodeRecoveryDto codeRecoveryDto = CodeRecoveryDto.builder()
-      .code(codigoRestauracion)
+      .code(codigoRestauraciong)
       .expirationDate(new Date())
       .build();
 
