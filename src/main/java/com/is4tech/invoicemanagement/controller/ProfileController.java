@@ -43,6 +43,7 @@ public class ProfileController {
 
   private static final String NAME_ENTITY = "Profile";
   private static final String ID_ENTITY = "profile_id";
+  int statusCode;
 
   @PostMapping("/profile")
   public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
@@ -50,7 +51,7 @@ public class ProfileController {
     try {
       profileDto.setStatus(true);
       profileSave = profileService.saveProfile(profileDto);
-      
+
       List<RolDto> rols = savedRols(profileDto, profileSave.getProfileId());
 
       return new ResponseEntity<>(Message.builder()
