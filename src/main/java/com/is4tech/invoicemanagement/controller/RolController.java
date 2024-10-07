@@ -2,6 +2,10 @@ package com.is4tech.invoicemanagement.controller;
 
 import java.util.List;
 
+import com.is4tech.invoicemanagement.dto.RoleSearchDto;
+import com.is4tech.invoicemanagement.service.AuditService;
+import com.is4tech.invoicemanagement.utils.MessagePage;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -34,79 +38,113 @@ public class RolController {
 
     private static final String NAME_ENTITY = "Role";
     private static final String ID_ENTITY = "Id";
+    int statusCode;
+    @Autowired
+    private AuditService auditService;
 
-    @PostMapping("/rol")
-    public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto) throws BadRequestException {
+    @PostMapping("/create-role")
+    public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto, HttpServletRequest request) throws BadRequestException {
         try {
-            RolDto rolSave = rolService.saveRol(rolDto);
+            RolDto rolSave = rolService.saveRol(rolDto, request);
+
+            statusCode = HttpStatus.CREATED.value();
             return new ResponseEntity<>(Message.builder()
                     .note("Saved successfully")
                     .object(rolSave)
                     .build(),
                     HttpStatus.CREATED);
-        } catch (DataAccessException exDt) {
-            throw new BadRequestException("Error saving record: " + exDt.getMessage());
+
+        } catch (DataAccessException e) {
+            statusCode = HttpStatus.BAD_REQUEST.value();
+            throw new BadRequestException("Error saving record: " + e.getMessage());
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            throw e;
+        } catch (Exception e) {
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 
 
-    @PutMapping("/rol/{id}")
-    public ResponseEntity<Message> updateRol(@RequestBody RolDto rolDto,@PathVariable Integer id) throws BadRequestException{
+    @PutMapping("/update-role/{id}")
+    public ResponseEntity<Message> updateRol(@RequestBody @Valid RolDto rolDto, @PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         RolDto rolUpdate = null;
         try {
-            if(rolService.existById(id)){
-                rolDto.setRolId(id);
-                rolUpdate = rolService.saveRol(rolDto);
-                return new ResponseEntity<>(Message.builder()
-                        .note("Update successfully")
-                        .object(rolUpdate)
-                        .build(),
-                        HttpStatus.OK);
-            } else
-                throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
+            if (!rolService.existById(id)) {
+                throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+            }
+
+            rolDto.setRolId(id);
+
+            rolUpdate = rolService.updateRol(id, rolDto, request);
+
+            return new ResponseEntity<>(Message.builder()
+                    .note("Update successfully")
+                    .object(rolUpdate)
+                    .build(), HttpStatus.OK);
 
         } catch (DataAccessException exDt) {
-            throw new BadRequestException("Error update record: " + exDt.getMessage());
+            throw new BadRequestException("Error updating record: " + exDt.getMessage());
+        } catch (Exception e) {
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 
-    @DeleteMapping("/rol/{id}")
-    public ResponseEntity<Message> deleteRol(@PathVariable Integer id) throws BadRequestException{
+    @DeleteMapping("/delete-role/{id}")
+    public ResponseEntity<Message> deleteRol(@PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         try {
-            RolDto rolDelete = rolService.findByIdRol(id);
-            rolService.deleteRol(rolDelete);
+            RolDto rolDelete = rolService.findByIdRol(id, request);
+            rolService.deleteRol(rolDelete, request);
+
             return new ResponseEntity<>(Message.builder()
                     .object(null)
                     .build(),
                     HttpStatus.NO_CONTENT);
+
+        } catch (ResourceNorFoundException e) {
+            throw new BadRequestException("Rol not found: " + e.getMessage());
         } catch (DataAccessException e) {
             throw new BadRequestException("Error deleting record: " + e.getMessage());
+        } catch (Exception e) {
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 
-    @GetMapping("/rol/{id}")
-    public ResponseEntity<Message> showByIdRol(@PathVariable Integer id){
-        RolDto rolDto = rolService.findByIdRol(id);
-        if(rolDto == null)
-            throw new ResourceNorFoundException(NAME_ENTITY,ID_ENTITY,id.toString());
+    @GetMapping("/roles")
+    public ResponseEntity<MessagePage> showAllRoles(Pageable pageable, HttpServletRequest request){
+        try {
+            MessagePage message = rolService.listAllRol(pageable, request);
+            statusCode = HttpStatus.OK.value();
 
-        return new ResponseEntity<>(Message.builder()
-                .note("Record found")
-                .object(rolDto)
-                .build(),
-                HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
+            throw e;
+        } catch (Exception e) {
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw new com.is4tech.invoicemanagement.exception.BadRequestException("Unexpected error occurred: " + e.getMessage());
+        }
     }
 
-    @GetMapping("/rols")
-    public ResponseEntity<Message> showAllRols(@PageableDefault(size = 10) Pageable pageable){
-        List<RolDto> rols = rolService.listAllRol(pageable);
-        if(rols.isEmpty())
-            throw new ResourceNorFoundException(NAME_ENTITY);
+    @PostMapping("/roles/search")
+    public ResponseEntity<MessagePage> searchRoles(@RequestBody RoleSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) throws BadRequestException {
+        try {
+            MessagePage messagePage = rolService.findByNameRol(roleSearchDto, pageable, request);
+            statusCode = HttpStatus.OK.value();
 
-        return new ResponseEntity<>(Message.builder()
-                .note("Records found")
-                .object(rols)
-                .build(),
-                HttpStatus.OK);
+            return new ResponseEntity<>(messagePage, HttpStatus.OK);
+
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
+            throw e;
+        } catch (Exception e) {
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+        }
     }
 }

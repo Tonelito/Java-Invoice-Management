@@ -42,7 +42,7 @@ public class UserController {
     private static final String ID_ENTITY = "user_id";
     int statusCode;
 
-    @PostMapping("/user")
+    @PostMapping("/create-user")
     public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto, HttpServletRequest request) {
         try {
             User userSave = userService.saveUser(userDto, request);

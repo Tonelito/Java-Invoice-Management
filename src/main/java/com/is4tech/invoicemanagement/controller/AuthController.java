@@ -49,8 +49,7 @@ public class AuthController {
         String generatePassword = PasswordGenerator.generatePassword();
 
         usersDto.setPassword(generatePassword);
-
-        System.out.println(generatePassword);
+        usersDto.setStatus(true);
 
         User registeredUser = authenticationService.signup(usersDto);
 
