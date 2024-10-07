@@ -46,9 +46,6 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) throws MessagingException {
-        String generatePassword = PasswordGenerator.generatePassword();
-
-        usersDto.setPassword(generatePassword);
         usersDto.setStatus(true);
 
         User registeredUser = authenticationService.signup(usersDto);

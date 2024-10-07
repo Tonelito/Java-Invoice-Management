@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/invoice-management/v0.1/role/**").hasAnyAuthority("ROLE_ROL") 
                         .requestMatchers("/invoice-management/v0.1/profile/**").hasAnyAuthority("ROLE_PROFILE") 
                         .requestMatchers("/invoice-management/v0.1/profile-rol-detail/**").hasAnyAuthority("ROLE_DETAIL_PROFILE_ROL")
+                        .requestMatchers("/invoice-management/v0.1/audit/**").hasAnyAuthority("ROLE_AUDIT")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

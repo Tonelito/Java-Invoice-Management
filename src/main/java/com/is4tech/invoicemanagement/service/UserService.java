@@ -193,6 +193,16 @@ public class UserService {
         return user;
     }
 
+    public User toggleUserStatus(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNorFoundException("User not found"));
+
+        user.setStatus(!user.getStatus());
+
+        userRepository.save(user);
+
+        return user;
+    }
+
     public boolean existById(Integer userId) {
         return userRepository.existsById(userId);
     }

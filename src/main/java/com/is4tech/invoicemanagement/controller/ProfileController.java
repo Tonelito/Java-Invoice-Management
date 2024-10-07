@@ -91,7 +91,7 @@ public class ProfileController {
         profileDto.setProfileId(id);
         profileDto.setStatus(true);
 
-        profileUpdate = profileService.saveProfile(profileDto,request);
+        profileUpdate = profileService.updateProfile(id, profileDto, request);
 
         List<RolDto> rols = savedRols(profileDto, id, request);
 
