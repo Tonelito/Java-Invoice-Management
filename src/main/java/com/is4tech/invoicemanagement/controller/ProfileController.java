@@ -3,6 +3,7 @@ package com.is4tech.invoicemanagement.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,20 +20,25 @@ import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetail;
 import com.is4tech.invoicemanagement.model.ProfileRoleDetailId;
 import com.is4tech.invoicemanagement.model.Rol;
+import com.is4tech.invoicemanagement.service.AuditService;
 import com.is4tech.invoicemanagement.service.ProfileRoleDetailService;
 import com.is4tech.invoicemanagement.service.ProfileService;
 import com.is4tech.invoicemanagement.service.RolService;
 import com.is4tech.invoicemanagement.utils.Message;
+import com.is4tech.invoicemanagement.utils.MessagePage;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/invoice-management/v0.1/")
+@RequestMapping("/invoice-management/v0.1/profile")
 public class ProfileController {
 
   private final ProfileService profileService;
   private final RolService rolService;
   private final ProfileRoleDetailService profileRoleDetailService;
+  @Autowired
+  private AuditService auditService;
 
   public ProfileController(ProfileService profileService, RolService rolService,
       ProfileRoleDetailService profileRoleDetailService) {
@@ -45,14 +51,14 @@ public class ProfileController {
   private static final String ID_ENTITY = "profile_id";
   int statusCode;
 
-  @PostMapping("/profile")
-  public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto){
+  @PostMapping("/create")
+  public ResponseEntity<Message> saveProfile(@RequestBody @Valid ProfileDto profileDto, HttpServletRequest request){
     ProfileDto profileSave = null;
     try {
       profileDto.setStatus(true);
-      profileSave = profileService.saveProfile(profileDto);
+      profileSave = profileService.saveProfile(profileDto,request);
 
-      List<RolDto> rols = savedRols(profileDto, profileSave.getProfileId());
+      List<RolDto> rols = savedRols(profileDto, profileSave.getProfileId(),request);
 
       return new ResponseEntity<>(Message.builder()
           .note("Saved successfully")
@@ -66,21 +72,28 @@ public class ProfileController {
           .build(),
           HttpStatus.CREATED);
     } catch (DataAccessException e) {
-      throw new BadRequestException("Error save record: " + e.getMessage());
+      statusCode = HttpStatus.BAD_REQUEST.value();
+      throw new BadRequestException("Error saving record: " + e.getMessage());
+    } catch (ResourceNorFoundException e) {
+      statusCode = HttpStatus.NOT_FOUND.value();
+      throw e;
+    } catch (Exception e) {
+      statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
     }
   }
 
-  @PutMapping("/profile/{id}")
-  public ResponseEntity<Message> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Integer id) {
+  @PutMapping("/update/{id}")
+  public ResponseEntity<Message> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Integer id, HttpServletRequest request) {
     ProfileDto profileUpdate = null;
     try {
-      if (profileService.existById(id)) {
+      if (profileService.existsById(id)) {
         profileDto.setProfileId(id);
         profileDto.setStatus(true);
 
-        profileUpdate = profileService.saveProfile(profileDto);
+        profileUpdate = profileService.saveProfile(profileDto,request);
 
-        List<RolDto> rols = savedRols(profileDto, id);
+        List<RolDto> rols = savedRols(profileDto, id, request);
 
         return new ResponseEntity<>(Message.builder()
             .note("Update successfully")
@@ -95,22 +108,24 @@ public class ProfileController {
             HttpStatus.OK);
       } else
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
-    } catch (DataAccessException e) {
-      throw new BadRequestException("Error update record: " + e.getMessage());
+    } catch (DataAccessException exDt) {
+      throw new BadRequestException("Error updating record: " + exDt.getMessage());
+    } catch (Exception e) {
+      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
     }
   }
 
-  @PatchMapping("/profile/{id}")
-  public ResponseEntity<Message> statusChangeProfile(@PathVariable Integer id) {
+  @PatchMapping("/status-change/{id}")
+  public ResponseEntity<Message> statusChangeProfile(@PathVariable Integer id, HttpServletRequest request) {
     try {
-      if (profileService.existById(id)) {
-        ProfileDto profileUpdate = profileService.finByIdProfile(id);
+      if (profileService.existsById(id)) {
+        ProfileDto profileUpdate = profileService.findByIdProfile(id, request);
         if (profileUpdate.getStatus()) {
           profileUpdate.setStatus(false);
         } else
           profileUpdate.setStatus(true);
 
-        profileService.saveProfile(profileUpdate);
+        profileService.saveProfile(profileUpdate, request);
 
         return new ResponseEntity<>(Message.builder()
             .note("Update successfully")
@@ -119,54 +134,67 @@ public class ProfileController {
             HttpStatus.OK);
       } else
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
-    } catch (DataAccessException e) {
-      throw new BadRequestException("Error update record: " + e.getMessage());
+    } catch (DataAccessException exDt) {
+      throw new BadRequestException("Error updating record: " + exDt.getMessage());
+    } catch (Exception e) {
+      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
     }
   }
 
-  @DeleteMapping("/profile/{id}")
-  public ResponseEntity<Message> deleteProfile(@PathVariable Integer id) {
+  @DeleteMapping("/delete/{id}")
+  public ResponseEntity<Message> deleteProfile(@PathVariable Integer id, HttpServletRequest request) {
     try {
-      if(profileService.existById(id)){
-        ProfileDto profileDelete = profileService.finByIdProfile(id);
-        profileService.deleteProfile(profileDelete);
+      if(profileService.existsById(id)){
+        ProfileDto profileDelete = profileService.findByIdProfile(id, request);
+        profileService.deleteProfile(profileDelete, request);
       }else
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
       return new ResponseEntity<>(Message.builder()
           .object(null)
           .build(),
           HttpStatus.NO_CONTENT);
+    } catch (ResourceNorFoundException e) {
+      throw new BadRequestException("Rol not found: " + e.getMessage());
     } catch (DataAccessException e) {
       throw new BadRequestException("Error deleting record: " + e.getMessage());
+    } catch (Exception e) {
+      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
     }
   }
 
-  @GetMapping("/profile/{id}")
-  public ResponseEntity<Message> showByIdProfile(@PathVariable Integer id) {
-    ProfileDto profileDto = profileService.finByIdProfile(id);
-    if (profileDto == null)
-      throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
-    List<RolDto> rols = getAllRols(id);
+  @GetMapping("/show-by-id/{id}")
+  public ResponseEntity<Message> showByIdProfile(@PathVariable Integer id, HttpServletRequest request) {
+    try {
+      ProfileDto profileDto = profileService.findByIdProfile(id, request);
+      if (profileDto == null)
+        throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+      List<RolDto> rols = getAllRols(id, request);
 
-    return new ResponseEntity<>(Message.builder()
-        .note("Record found")
-        .object(ProfileRolListDto.builder()
-            .profileId(profileDto.getProfileId())
-            .name(profileDto.getName())
-            .description(profileDto.getDescription())
-            .status(profileDto.getStatus())
-            .rolsId(rols)
-            .build())
-        .build(),
-        HttpStatus.OK);
+      return new ResponseEntity<>(Message.builder()
+          .note("Record found")
+          .object(ProfileRolListDto.builder()
+              .profileId(profileDto.getProfileId())
+              .name(profileDto.getName())
+              .description(profileDto.getDescription())
+              .status(profileDto.getStatus())
+              .rolsId(rols)
+              .build())
+          .build(),
+          HttpStatus.OK);
+    }catch (ResourceNorFoundException e) {
+      statusCode = HttpStatus.NOT_FOUND.value();
+      auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
+      throw e;
+    } catch (Exception e) {
+      statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+      auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+      throw new com.is4tech.invoicemanagement.exception.BadRequestException("Unexpected error occurred: " + e.getMessage());
+    }
   }
 
-  @GetMapping("/profiles")
-  public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable) {
-    List<ProfileDto> profiles = profileService.listAllProfile(pageable);
-    if (profiles.isEmpty())
-      throw new ResourceNorFoundException(NAME_ENTITY);
-
+  @GetMapping("/show-all")
+  public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable, HttpServletRequest request) {
+    MessagePage profiles = profileService.listAllProfile(pageable, request);
     return new ResponseEntity<>(Message.builder()
         .note("Records found")
         .object(profiles)
@@ -174,7 +202,7 @@ public class ProfileController {
         HttpStatus.OK);
   }
 
-  private List<RolDto> savedRols(ProfileDto profileDto, Integer id){
+  private List<RolDto> savedRols(ProfileDto profileDto, Integer id, HttpServletRequest request){
     ProfileRoleDetailDtoId profileRoleDetailDtoId = ProfileRoleDetailDtoId.builder()
       .profileId(id)
       .rols(profileDto.getRolsId())
@@ -182,20 +210,20 @@ public class ProfileController {
 
     List<RolDto> rols = new ArrayList();
     for (Integer roldId : profileDto.getRolsId()) {
-      savedRolId(profileRoleDetailDtoId);
-      rols.add(rolService.findByIdRol(roldId));
+      savedRolId(profileRoleDetailDtoId, request);
+      rols.add(rolService.findByIdRol(roldId, request));
     }
     return rols;
   }
 
-  private void savedRolId(ProfileRoleDetailDtoId profileRoleDetailDtoId) {
+  private void savedRolId(ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) {
     Integer profileId = profileRoleDetailDtoId.getProfileId();
     List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
-        profileRoleDetailDtoId);
+        profileRoleDetailDtoId, request);
 
     if (!(rolsId.isEmpty())) {
       for (Integer rolsIdModific : rolsId) {
-        profileRoleDetailService.deleteProfileRolDetailByIds(profileId, rolsIdModific);
+        profileRoleDetailService.deleteProfileRolDetailByIds(profileId, rolsIdModific, request);
       }
     }
 
@@ -211,8 +239,8 @@ public class ProfileController {
             .profileId(profileId)
             .roleId(rolId)
             .build();
-        profileRoleDetailService.saveProfileRoleDetail(detailSave);
-        RolDto rol = rolService.findByIdRol(rolId);
+        profileRoleDetailService.saveProfileRoleDetail(detailSave, request);
+        RolDto rol = rolService.findByIdRol(rolId, request);
         if (rol != null) {
           rolsSaved.add(rol);
         }
@@ -220,8 +248,8 @@ public class ProfileController {
     }
   }
 
-  private List<RolDto> getAllRols(Integer id){
-    List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
+  private List<RolDto> getAllRols(Integer id, HttpServletRequest request){
+    List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id, request);
     if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
     }

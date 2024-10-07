@@ -1,7 +1,5 @@
 package com.is4tech.invoicemanagement.controller;
 
-import java.util.List;
-
 import com.is4tech.invoicemanagement.dto.RoleSearchDto;
 import com.is4tech.invoicemanagement.service.AuditService;
 import com.is4tech.invoicemanagement.utils.MessagePage;
@@ -10,7 +8,6 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,7 +27,7 @@ import com.is4tech.invoicemanagement.utils.Message;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/invoice-management/v0.1/")
+@RequestMapping("/invoice-management/v0.1/role")
 public class RolController {
 
     @Autowired
@@ -42,7 +39,7 @@ public class RolController {
     @Autowired
     private AuditService auditService;
 
-    @PostMapping("/create-role")
+    @PostMapping("/create")
     public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto, HttpServletRequest request) throws BadRequestException {
         try {
             RolDto rolSave = rolService.saveRol(rolDto, request);
@@ -67,7 +64,7 @@ public class RolController {
     }
 
 
-    @PutMapping("/update-role/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Message> updateRol(@RequestBody @Valid RolDto rolDto, @PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         RolDto rolUpdate = null;
         try {
@@ -91,7 +88,7 @@ public class RolController {
         }
     }
 
-    @DeleteMapping("/delete-role/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Message> deleteRol(@PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         try {
             RolDto rolDelete = rolService.findByIdRol(id, request);
@@ -111,7 +108,7 @@ public class RolController {
         }
     }
 
-    @GetMapping("/roles")
+    @GetMapping("/show-all")
     public ResponseEntity<MessagePage> showAllRoles(Pageable pageable, HttpServletRequest request){
         try {
             MessagePage message = rolService.listAllRol(pageable, request);
@@ -129,7 +126,7 @@ public class RolController {
         }
     }
 
-    @PostMapping("/roles/search")
+    @PostMapping("/search")
     public ResponseEntity<MessagePage> searchRoles(@RequestBody RoleSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) throws BadRequestException {
         try {
             MessagePage messagePage = rolService.findByNameRol(roleSearchDto, pageable, request);

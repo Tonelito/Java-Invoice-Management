@@ -10,13 +10,14 @@ import com.is4tech.invoicemanagement.repository.AuditRepository;
 import com.is4tech.invoicemanagement.repository.UserRepository;
 import com.is4tech.invoicemanagement.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ public class AuditService {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logAudit(Object object, Method method, Exception ex, int statusCode, String entity, HttpServletRequest request) {
         AuditDto auditDto = new AuditDto();
 
@@ -54,20 +56,17 @@ public class AuditService {
         auditDto.setEntity(entity);
         auditDto.setErrorMessage(ex != null ? ex.getMessage() : null);
         auditDto.setRequest(formatRequestToJson(object));
-        System.out.println(auditDto.getRequest() + " request");
         saveAudit(auditDto);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void saveAudit(AuditDto auditDto) {
-        Integer userId = auditDto.getUserId();
-        logger.info("Logging audit: {}", auditDto);
-
-        if (userId == null) {
+        if (auditDto.getUserId() == null) {
             throw new BadRequestException("User ID must not be null");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new BadRequestException("User not found with ID: " + userId));
+        User user = userRepository.findById(auditDto.getUserId()).orElseThrow(() ->
+                new BadRequestException("User not found with ID: " + auditDto.getUserId()));
 
         Audit audit = new Audit();
         audit.setEntity(auditDto.getEntity());
@@ -81,7 +80,7 @@ public class AuditService {
         auditRepository.save(audit);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<AuditDto> findByEntityAndDateRangeAndOptionalUserId(String entity, LocalDate startDate, LocalDate endDate, Integer userId, Pageable pageable) {
         Page<Audit> auditsPage = auditRepository.findByEntityAndDateRangeAndOptionalUserId(entity, startDate, endDate, userId, pageable);
 

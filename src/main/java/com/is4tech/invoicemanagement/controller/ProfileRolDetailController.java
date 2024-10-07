@@ -29,11 +29,13 @@ import com.is4tech.invoicemanagement.service.ProfileRoleDetailService;
 import com.is4tech.invoicemanagement.service.ProfileService;
 import com.is4tech.invoicemanagement.service.RolService;
 import com.is4tech.invoicemanagement.utils.Message;
+import com.is4tech.invoicemanagement.utils.MessagePage;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/invoice-management/v0.1/")
+@RequestMapping("/invoice-management/v0.1/profile-rol-detail")
 public class ProfileRolDetailController {
 
     private static final String ID_ENTITY = "profile_rol_detail_id";
@@ -43,6 +45,8 @@ public class ProfileRolDetailController {
     private final ProfileService profileService;
     private final RolService rolService;
 
+    int statusCode;
+
     public ProfileRolDetailController(ProfileRoleDetailService profileRoleDetailService, ProfileService profileService,
                                       RolService rolService) {
         this.profileRoleDetailService = profileRoleDetailService;
@@ -50,20 +54,22 @@ public class ProfileRolDetailController {
         this.rolService = rolService;
     }
 
-    @PostMapping("/profile-rol-detail")
+    @PostMapping("/create")
     public ResponseEntity<Message> saveProfileRolDetail(
-            @RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId) throws BadRequestException {
+            @RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) throws BadRequestException {
         try {
             Integer profileId = profileRoleDetailDtoId.getProfileId();
-            ProfileDto profileDto = profileService.finByIdProfile(profileId);
+            ProfileDto profileDto = profileService.findByIdProfile(profileId, request);
             List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
-                    profileRoleDetailDtoId);
+                    profileRoleDetailDtoId, request);
 
             if (!(rolsId.isEmpty())) {
                 for (Integer rolsIdModific : rolsId) {
-                    profileRoleDetailService.deleteProfileRolDetailByIds(profileId, rolsIdModific);
+                    profileRoleDetailService.deleteProfileRolDetailByIds(profileId, rolsIdModific, request);
                 }
             }
+
+            statusCode = HttpStatus.CREATED.value();
 
             List<RolDto> rolsSaved = new ArrayList<>();
             for (Integer rolId : profileRoleDetailDtoId.getRols()) {
@@ -77,8 +83,8 @@ public class ProfileRolDetailController {
                             .profileId(profileId)
                             .roleId(rolId)
                             .build();
-                    profileRoleDetailService.saveProfileRoleDetail(detailSave);
-                    RolDto rol = rolService.findByIdRol(rolId);
+                    profileRoleDetailService.saveProfileRoleDetail(detailSave, request);
+                    RolDto rol = rolService.findByIdRol(rolId, request);
                     if (rol != null) {
                         rolsSaved.add(rol);
                     }
@@ -95,13 +101,20 @@ public class ProfileRolDetailController {
                     .build(), HttpStatus.CREATED);
 
         } catch (DataAccessException e) {
-            throw new BadRequestException("Error save record: " + e.getMessage());
+            statusCode = HttpStatus.BAD_REQUEST.value();
+            throw new BadRequestException("Error saving record: " + e.getMessage());
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            throw e;
+        } catch (Exception e) {
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 
-    @GetMapping("/profile-rol-detail/rols/{idProfile}")
-    public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile) {
-        List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(idProfile);
+    @GetMapping("/show/rols/{idProfile}")
+    public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile, HttpServletRequest request) {
+        List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(idProfile, request);
 
         if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, idProfile.toString());
@@ -119,12 +132,9 @@ public class ProfileRolDetailController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/profile-rol-details")
-    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable) {
-        List<ProfileRoleDetailDto> profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable);
-        if (profileRolDetailsId.isEmpty())
-            throw new ResourceNorFoundException(NAME_ENTITY);
-
+    @GetMapping("/show-all")
+    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable, HttpServletRequest request) {
+        MessagePage profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable, request);
         return new ResponseEntity<>(Message.builder()
                 .note("Records found")
                 .object(profileRolDetailsId)
@@ -132,17 +142,17 @@ public class ProfileRolDetailController {
                 HttpStatus.OK);
     }
 
-    @DeleteMapping("/profile-rol-detail/{id}")
-    public ResponseEntity<Message> deleteProfileRolDetail(@PathVariable Integer id) throws BadRequestException {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Message> deleteProfileRolDetail(@PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         try {
-            if(profileService.existById(id)){
-                List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
+            if(profileService.existsById(id)){
+                List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id, request);
                 List<Integer> rolsId = new ArrayList<>();
                 for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
                 rolsId.add(profilerRoleDetail.getRole().getRolId());
                 }
                 for (Integer rolsIdModific : rolsId) {
-                profileRoleDetailService.deleteProfileRolDetailByIds(id, rolsIdModific);
+                profileRoleDetailService.deleteProfileRolDetailByIds(id, rolsIdModific, request);
                 }    
                 return new ResponseEntity<>(Message.builder()
                     .object(null)
@@ -150,8 +160,12 @@ public class ProfileRolDetailController {
                     HttpStatus.NO_CONTENT);
             }else
                 throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
+        } catch (ResourceNorFoundException e) {
+            throw new BadRequestException("Rol not found: " + e.getMessage());
         } catch (DataAccessException e) {
             throw new BadRequestException("Error deleting record: " + e.getMessage());
+        } catch (Exception e) {
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 

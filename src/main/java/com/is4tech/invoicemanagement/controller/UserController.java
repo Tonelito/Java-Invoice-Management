@@ -23,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/invoice-management/v0.1/")
+@RequestMapping("/invoice-management/v0.1/user")
 public class UserController {
 
     private final UserService userService;
@@ -42,7 +42,7 @@ public class UserController {
     private static final String ID_ENTITY = "user_id";
     int statusCode;
 
-    @PostMapping("/create-user")
+    @PostMapping("/create")
     public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto, HttpServletRequest request) {
         try {
             User userSave = userService.saveUser(userDto, request);
@@ -83,7 +83,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/update-user/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Message> updateUser(@PathVariable Integer id, @RequestBody @Valid UserUpdateDto userUpdateDto, HttpServletRequest request) {
         try {
             if (!userService.existById(id)) {
@@ -113,7 +113,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/users")
+    @GetMapping("/show-all")
     public ResponseEntity<MessagePage> showAllUsers(Pageable pageable, HttpServletRequest request) {
         try {
             MessagePage message = userService.listAllUsers(pageable, request);
@@ -131,7 +131,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/users/search")
+    @PostMapping("/search")
     public ResponseEntity<MessagePage> searchUsers(@RequestBody UserSearchDto userSearchDto, Pageable pageable, HttpServletRequest request) {
         try {
             MessagePage message = userService.findByName(userSearchDto, pageable, request);

@@ -26,8 +26,7 @@ public class SecurityConfiguration {
 
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider
-    ) {
+            AuthenticationProvider authenticationProvider) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationProvider = authenticationProvider;
     }
@@ -39,11 +38,13 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/invoice-management/v0.1/auth/**", "/test/v1/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/javainuse-openapi/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/invoice-management/v0.1/user/**").hasAnyAuthority("ROLE_USER") 
+                        .requestMatchers("/invoice-management/v0.1/role/**").hasAnyAuthority("ROLE_ROL") 
+                        .requestMatchers("/invoice-management/v0.1/profile/**").hasAnyAuthority("ROLE_PROFILE") 
+                        .requestMatchers("/invoice-management/v0.1/profile-rol-detail/**").hasAnyAuthority("ROLE_DETAIL_PROFILE_ROL")
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
