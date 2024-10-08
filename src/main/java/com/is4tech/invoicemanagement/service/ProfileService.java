@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.dto.NameSearchDto;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
-import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;

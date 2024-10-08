@@ -6,7 +6,7 @@ import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;
 import com.is4tech.invoicemanagement.repository.AuthRepository;
-import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
+import com.is4tech.invoicemanagement.utils.PasswordGenerator;
 import com.is4tech.invoicemanagement.utils.SendEmail;
 
 import jakarta.mail.MessagingException;
@@ -38,30 +38,29 @@ public class AuthService {
         this.sendEmail = sendEmail;
     }
 
-    public User signup(UsersDto input) throws MessagingException {
+    public User signup(UsersDto usersDto) throws MessagingException {
         User user = new User();
-        String passwordCode = ResetCodeGenerator.getPassword(
-                                ResetCodeGenerator.MINUSCULAS+
-                                ResetCodeGenerator.MAYUSCULAS+
-                                ResetCodeGenerator.NUMEROS,10); 
+        String password = PasswordGenerator.generatePassword();
 
-        user.setFullName(input.getFullName());
-        user.setEmail(input.getEmail());
-        user.setPassword(passwordEncoder.encode(passwordCode));
-        user.setDateOfBirth(input.getDateOfBirth());
-        Profile profile = profileRepository.findById(input.getProfileId())
+        user.setFullName(usersDto.getFullName());
+        user.setEmail(usersDto.getEmail());
+        user.setPassword(passwordEncoder.encode(password));
+        user.setDateOfBirth(usersDto.getDateOfBirth());
+
+        Profile profile = profileRepository.findById(usersDto.getProfileId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
         user.setProfile(profile);
 
-        user.setStatus(true);
+        user.setStatus(usersDto.getStatus());
 
-        //User userSave = userRepository.save(user);
         sendEmail.sendEmailPassword(
-                input.getEmail(),
-                "infoFactura@facturacio.fac.com", 
+                usersDto.getEmail(),
+                "infoFactura@facturacio.fac.com",
                 "Credentails",
-                passwordCode);
-        User userSave = User.builder().fullName(user.getFullName()).build();
+                password);
+
+        User userSave = userRepository.save(user);
+
         return userSave;
     }
 

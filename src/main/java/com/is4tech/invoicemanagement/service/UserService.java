@@ -9,7 +9,6 @@ import com.is4tech.invoicemanagement.model.Profile;
 import com.is4tech.invoicemanagement.model.User;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;
 import com.is4tech.invoicemanagement.repository.UserRepository;
-import com.is4tech.invoicemanagement.utils.Message;
 import com.is4tech.invoicemanagement.utils.MessagePage;
 import com.is4tech.invoicemanagement.utils.PasswordGenerator;
 import jakarta.servlet.http.HttpServletRequest;
@@ -189,6 +188,16 @@ public class UserService {
 
         statusCode = HttpStatus.OK.value();
         auditService.logAudit(user, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+
+        return user;
+    }
+
+    public User toggleUserStatus(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNorFoundException("User not found"));
+
+        user.setStatus(!user.getStatus());
+
+        userRepository.save(user);
 
         return user;
     }

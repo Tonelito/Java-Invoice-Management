@@ -149,4 +149,42 @@ public class UserController {
             throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
+
+    @GetMapping("/search/{id}")
+    public ResponseEntity<User> searchUser(@PathVariable Integer id, HttpServletRequest request) {
+        try {
+            User user = userService.findByIdUser(id, request);
+            statusCode = HttpStatus.OK.value();
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            auditService.logAudit(id, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw e;
+        } catch (Exception e) {
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            auditService.logAudit(id, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/toggle-status/{id}")
+    public ResponseEntity<User> toggleUserStatus(@PathVariable Integer id, HttpServletRequest request) {
+        try {
+            User updatedUser = userService.toggleUserStatus(id);
+            statusCode = HttpStatus.OK.value();
+
+            auditService.logAudit(id, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            auditService.logAudit(id, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw e;
+        } catch (Exception e) {
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            auditService.logAudit(id, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+        }
+    }
 }

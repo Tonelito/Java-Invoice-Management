@@ -37,5 +37,5 @@ public class UsersDto {
     private Date dateOfBirth;
 
     @JsonIgnore
-    private Boolean status = true;
+    private Boolean status;
 }
