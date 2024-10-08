@@ -4,7 +4,6 @@ package com.is4tech.invoicemanagement.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.is4tech.invoicemanagement.dto.RoleSearchDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.utils.MessagePage;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is4tech.invoicemanagement.model.Rol;
+import com.is4tech.invoicemanagement.dto.NameSearchDto;
 import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.repository.RolRepository;
 
@@ -75,7 +75,7 @@ public class RolService {
     }
 
     @Transactional(readOnly = true)
-    public MessagePage findByNameRol(RoleSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) {
+    public MessagePage findByNameRol(NameSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) {
         if (roleSearchDto == null || roleSearchDto.getName() == null) {
             throw new BadRequestException("Rol name cannot be null or empty");
         }

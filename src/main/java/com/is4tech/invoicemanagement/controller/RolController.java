@@ -1,6 +1,5 @@
 package com.is4tech.invoicemanagement.controller;
 
-import com.is4tech.invoicemanagement.dto.RoleSearchDto;
 import com.is4tech.invoicemanagement.service.AuditService;
 import com.is4tech.invoicemanagement.utils.MessagePage;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.is4tech.invoicemanagement.dto.NameSearchDto;
 import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.service.RolService;
@@ -127,7 +127,7 @@ public class RolController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<MessagePage> searchRoles(@RequestBody RoleSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) throws BadRequestException {
+    public ResponseEntity<MessagePage> searchRoles(@RequestBody NameSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) throws BadRequestException {
         try {
             MessagePage messagePage = rolService.findByNameRol(roleSearchDto, pageable, request);
             statusCode = HttpStatus.OK.value();

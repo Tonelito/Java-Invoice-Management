@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.is4tech.invoicemanagement.dto.NameSearchDto;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.dto.ProfileRolListDto;
 import com.is4tech.invoicemanagement.dto.ProfileRoleDetailDtoId;
@@ -181,6 +182,23 @@ public class ProfileController {
               .build())
           .build(),
           HttpStatus.OK);
+    }catch (ResourceNorFoundException e) {
+      statusCode = HttpStatus.NOT_FOUND.value();
+      auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
+      throw e;
+    } catch (Exception e) {
+      statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+      auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+      throw new com.is4tech.invoicemanagement.exception.BadRequestException("Unexpected error occurred: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/show-by-name")
+  public ResponseEntity<MessagePage> showByNameProfile(@RequestBody NameSearchDto nameSearchDto, Pageable pageable, HttpServletRequest request) {
+    try {
+      MessagePage profileDto = profileService.findByNameProfile(nameSearchDto, pageable, request);
+      statusCode = HttpStatus.OK.value();
+      return new ResponseEntity<>(profileDto, HttpStatus.OK);
     }catch (ResourceNorFoundException e) {
       statusCode = HttpStatus.NOT_FOUND.value();
       auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );

@@ -1,5 +1,8 @@
 package com.is4tech.invoicemanagement.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is4tech.invoicemanagement.model.Profile;
+import com.is4tech.invoicemanagement.dto.NameSearchDto;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
+import com.is4tech.invoicemanagement.dto.RolDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.repository.ProfileRespository;
@@ -80,6 +85,37 @@ public class ProfileService {
     auditService.logAudit(profileDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
     return profileDto;
+  }
+
+  @Transactional(readOnly = true)
+  public MessagePage findByNameProfile(NameSearchDto nameSearchDto, Pageable pageable, HttpServletRequest request) {
+    if (nameSearchDto == null || nameSearchDto.getName() == null) {
+      throw new BadRequestException("Profile name cannot be null or empty");
+    } 
+    String name = nameSearchDto.getName();
+    Page<Profile> profiles = profileRespository.findByName(name, pageable);
+
+    if (profiles.isEmpty()) {
+      int statusCode = HttpStatus.NOT_FOUND.value();
+      auditService.logAudit(name, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
+      throw new ResourceNorFoundException("Profile", "Name", name);
+    }
+
+    int statusCode = HttpStatus.OK.value();
+    auditService.logAudit(name, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+
+    List<ProfileDto> profileDtos = profiles.getContent().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+    return MessagePage.builder()
+      .note("Profiles Found")
+      .object(profileDtos)
+      .totalElements((int) profiles.getTotalElements())
+      .totalPages(profiles.getTotalPages())
+      .currentPage(profiles.getNumber())
+      .pageSize(profiles.getSize())
+      .build();
   }
 
   @Transactional

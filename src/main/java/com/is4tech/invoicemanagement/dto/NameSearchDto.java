@@ -7,6 +7,6 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class RoleSearchDto {
+public class NameSearchDto {
     private String name;
 }
