@@ -13,7 +13,6 @@ import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
 import com.is4tech.invoicemanagement.utils.SendEmail;
 
 import com.is4tech.invoicemanagement.service.AuthService;
-import com.is4tech.invoicemanagement.utils.PasswordGenerator;
 
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;

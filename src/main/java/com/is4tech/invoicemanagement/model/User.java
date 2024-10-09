@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
@@ -52,7 +53,8 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return profile.getRoles().stream()
-                .map(profileRoleDetail -> new SimpleGrantedAuthority(profileRoleDetail.getRole().getCode()))
+                .map(profileRoleDetail -> 
+                new SimpleGrantedAuthority(profileRoleDetail.getRole().getCode()))
                 .collect(Collectors.toList());
     }
 
