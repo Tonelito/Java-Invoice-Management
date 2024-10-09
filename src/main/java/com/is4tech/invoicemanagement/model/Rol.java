@@ -27,8 +27,8 @@ public class Rol implements Serializable{
     private String name;
     
     @NotEmpty(message = "Description is required")
-    @Column(name = "description")
-    private String description;
+    @Column(name = "code")
+    private String code;
 
     @Column(name = "status")
     private Boolean status;

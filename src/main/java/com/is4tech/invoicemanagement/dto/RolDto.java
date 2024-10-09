@@ -24,6 +24,6 @@ public class RolDto {
     private String name;
     
     @NotEmpty(message = "Description is required")
-    private String description;
+    private String code;
     private Boolean status;
 }

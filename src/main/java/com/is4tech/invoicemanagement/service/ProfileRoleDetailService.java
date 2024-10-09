@@ -207,7 +207,7 @@ public class ProfileRoleDetailService {
         return RolDto.builder()
                 .rolId(rol.getRolId())
                 .name(rol.getName())
-                .description(rol.getDescription())
+                .code(rol.getCode())
                 .status(rol.getStatus())
                 .build();
     }
@@ -216,7 +216,7 @@ public class ProfileRoleDetailService {
         return Rol.builder()
                 .rolId(rolDto.getRolId())
                 .name(rolDto.getName())
-                .description(rolDto.getDescription())
+                .code(rolDto.getCode())
                 .status(rolDto.getStatus())
                 .build();
     }

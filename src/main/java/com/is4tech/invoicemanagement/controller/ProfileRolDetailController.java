@@ -173,7 +173,7 @@ public class ProfileRolDetailController {
         return RolDto.builder()
                 .rolId(rol.getRolId())
                 .name(rol.getName())
-                .description(rol.getDescription())
+                .code(rol.getCode())
                 .status(rol.getStatus())
                 .build();
     }

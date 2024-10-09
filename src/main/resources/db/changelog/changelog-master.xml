@@ -300,4 +300,12 @@
     <changeSet id="20241004-3" author="echamale">
         <dropColumn tableName="audit" columnName="response_time"/>
     </changeSet>
+
+    <changeSet id="20241009-1" author="dalvarado">
+        <renameColumn 
+            tableName="role" 
+            oldColumnName="description" 
+            newColumnName="code" 
+            columnDataType="varchar(50)"/>
+    </changeSet>
 </databaseChangeLog>

@@ -154,8 +154,8 @@ public class RolService {
             if (rolDto.getName() != null) {
                 existingRol.setName(rolDto.getName());
             }
-            if (rolDto.getDescription() != null) {
-                existingRol.setDescription(rolDto.getDescription());
+            if (rolDto.getCode() != null) {
+                existingRol.setCode(rolDto.getCode());
             }
 
             Rol savedRol = rolRepository.save(existingRol);
@@ -179,7 +179,7 @@ public class RolService {
         return Rol.builder()
             .rolId(rolDto.getRolId())
             .name(rolDto.getName())
-            .description(rolDto.getDescription())
+            .code(rolDto.getCode())
             .status(rolDto.getStatus())
             .build();
     }
@@ -188,7 +188,7 @@ public class RolService {
         return RolDto.builder()
             .rolId(rol.getRolId())
             .name(rol.getName())
-            .description(rol.getDescription())
+            .code(rol.getCode())
             .status(rol.getStatus())
             .build();
     }
