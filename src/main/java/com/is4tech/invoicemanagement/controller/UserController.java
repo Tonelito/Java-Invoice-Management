@@ -10,8 +10,6 @@ import com.is4tech.invoicemanagement.service.AuditService;
 import com.is4tech.invoicemanagement.service.UserService;
 import com.is4tech.invoicemanagement.utils.Message;
 import com.is4tech.invoicemanagement.utils.MessagePage;
-import com.is4tech.invoicemanagement.utils.PasswordGenerator;
-import com.is4tech.invoicemanagement.utils.SendEmail;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,7 +17,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,13 +25,9 @@ public class UserController {
 
     private final UserService userService;
     private final AuditService auditService;
-    private final SendEmail sendEmail;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService, SendEmail sendEmail, PasswordEncoder passwordEncoder, AuditService auditService) {
+    public UserController(UserService userService, AuditService auditService) {
         this.userService = userService;
-        this.sendEmail = sendEmail;
-        this.passwordEncoder = passwordEncoder;
         this.auditService = auditService;
     }
 
@@ -43,45 +36,42 @@ public class UserController {
     int statusCode;
 
     @PostMapping("/create")
-    public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto, HttpServletRequest request) {
+    public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto, HttpServletRequest request) throws BadRequestException {
         try {
-            User userSave = userService.saveUser(userDto, request);
+            User savedUser = userService.saveUser(userDto, request);
 
-            if (userSave != null) {
-                String generatePassword = PasswordGenerator.generatePassword();
-                sendEmail.sendEmailPassword(
-                        userSave.getEmail(),
-                        "infoFactura@facturacio.fac.com",
-                        "Credentials",
-                        "Your login credentials are: \nEmail = " + userSave.getEmail() +
-                                "\nPassword = " + generatePassword);
+            if (savedUser != null) {
+                statusCode = HttpStatus.CREATED.value();
+                auditService.logAudit(userDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
             }
 
-            statusCode = HttpStatus.CREATED.value();
             return new ResponseEntity<>(Message.builder()
                     .note("Saved Successfully")
                     .object(UsersDto.builder()
-                            .userId(userSave.getUserId())
-                            .fullName(userSave.getFullName())
-                            .email(userSave.getEmail())
-                            .profileId(userSave.getProfile().getProfileId())
-                            .dateOfBirth(userSave.getDateOfBirth())
-                            .status(userSave.getStatus())
+                            .userId(savedUser.getUserId())
+                            .fullName(savedUser.getFullName())
+                            .email(savedUser.getEmail())
+                            .profileId(savedUser.getProfile().getProfileId())
+                            .dateOfBirth(savedUser.getDateOfBirth())
+                            .status(savedUser.getStatus())
                             .build())
-                    .build(),
-                    HttpStatus.CREATED);
+                    .build(), HttpStatus.CREATED);
 
         } catch (DataAccessException e) {
             statusCode = HttpStatus.BAD_REQUEST.value();
+            auditService.logAudit(userDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw new BadRequestException("Error saving record: " + e.getMessage());
         } catch (ResourceNorFoundException e) {
             statusCode = HttpStatus.NOT_FOUND.value();
+            auditService.logAudit(userDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw e;
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            auditService.logAudit(userDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
+
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Message> updateUser(@PathVariable Integer id, @RequestBody @Valid UserUpdateDto userUpdateDto, HttpServletRequest request) {
@@ -151,9 +141,9 @@ public class UserController {
     }
 
     @GetMapping("/search/{id}")
-    public ResponseEntity<User> searchUser(@PathVariable Integer id, HttpServletRequest request) {
+    public ResponseEntity<UsersDto> searchUser(@PathVariable Integer id, HttpServletRequest request) {
         try {
-            User user = userService.findByIdUser(id, request);
+            UsersDto user = userService.findByIdUser(id, request);
             statusCode = HttpStatus.OK.value();
 
             return new ResponseEntity<>(user, HttpStatus.OK);

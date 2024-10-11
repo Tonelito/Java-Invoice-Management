@@ -186,7 +186,7 @@ public class ProfileService {
         .profileId(profileDto.getProfileId())
         .name(profileDto.getName())
         .description(profileDto.getDescription())
-        .status(profileDto.getStatus())
+        .status(true)
         .build();
   }
 }

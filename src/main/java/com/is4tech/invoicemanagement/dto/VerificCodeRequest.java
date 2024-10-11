@@ -1,7 +1,7 @@
 package com.is4tech.invoicemanagement.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class VerificCodeRequest {
-    @NotEmpty(message = "Code is required")
+    @NotNull(message = "[Código] no debe de ser nulo.")
     private CodePasswordDto codePassword;
-    @NotEmpty(message = "Code is required")
-    @Email(message = "Email must be valid")
+    @NotNull(message = "[Correo electrónico] no debe de ser nulo.")
+    @Email(message = "[Correo electrónico] debe de tener un formato válido.")
     private EmailDto email;
 }

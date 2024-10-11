@@ -11,10 +11,13 @@ import com.is4tech.invoicemanagement.repository.ProfileRespository;
 import com.is4tech.invoicemanagement.repository.UserRepository;
 import com.is4tech.invoicemanagement.utils.MessagePage;
 import com.is4tech.invoicemanagement.utils.PasswordGenerator;
+import com.is4tech.invoicemanagement.utils.SendEmail;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -34,11 +37,13 @@ public class UserService {
     private ProfileRespository profileRepository;
     @Autowired
     private AuditService auditService;
+    private final SendEmail sendEmail;
 
     private static final String NAME_ENTITY = "Users";
     private static final String ID_ENTITY = "user_id";
     int statusCode;
 
+    @Transactional
     public MessagePage listAllUsers(Pageable pageable, HttpServletRequest request) {
         Page<User> users = userRepository.findAll(pageable);
 
@@ -49,11 +54,23 @@ public class UserService {
         }
 
         statusCode = HttpStatus.OK.value();
-        auditService.logAudit(users.getContent(), this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+
+        auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+
+        List<UsersDto> userDtos = users.getContent().stream()
+                .map(user -> UsersDto.builder()
+                        .userId(user.getUserId())
+                        .fullName(user.getFullName())
+                        .email(user.getEmail())
+                        .profileId(user.getProfile() != null ? user.getProfile().getProfileId() : null)
+                        .dateOfBirth(user.getDateOfBirth())
+                        .status(user.getStatus())
+                        .build())
+                .collect(Collectors.toList());
 
         return MessagePage.builder()
                 .note("Users Retrieved Successfully")
-                .object(users.getContent())
+                .object(userDtos)
                 .totalElements((int) users.getTotalElements())
                 .totalPages(users.getTotalPages())
                 .currentPage(users.getNumber())
@@ -62,20 +79,17 @@ public class UserService {
     }
 
     @Transactional
-    public User saveUser(UsersDto usersDto, HttpServletRequest request) {
+    public User saveUser(UsersDto usersDto, HttpServletRequest request) throws MessagingException {
         try {
             Profile profile = profileRepository.findById(usersDto.getProfileId())
                     .orElseThrow(() -> new ResourceNorFoundException("Profile not found"));
 
             String rawPassword = PasswordGenerator.generatePassword();
-            usersDto.setPassword(rawPassword);
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String encodedPassword = passwordEncoder.encode(rawPassword);
             usersDto.setStatus(true);
 
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            String encodedPassword = passwordEncoder.encode(usersDto.getPassword());
-
             User user = User.builder()
-                    .userId(usersDto.getUserId())
                     .fullName(usersDto.getFullName())
                     .email(usersDto.getEmail())
                     .password(encodedPassword)
@@ -84,18 +98,35 @@ public class UserService {
                     .profile(profile)
                     .build();
 
+            sendEmail.sendEmailPassword(
+                    usersDto.getEmail(),
+                    "infoFactura@facturacio.fac.com",
+                    "Credentials",
+                    rawPassword
+            );
+
             User savedUser = userRepository.save(user);
 
             statusCode = HttpStatus.CREATED.value();
             auditService.logAudit(usersDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
             return savedUser;
+        } catch (ResourceNorFoundException e) {
+            statusCode = HttpStatus.NOT_FOUND.value();
+            auditService.logAudit(usersDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw e;
+        } catch (DataAccessException e) {
+            statusCode = HttpStatus.BAD_REQUEST.value();
+            auditService.logAudit(usersDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
+            throw new BadRequestException("Error saving record: " + e.getMessage());
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-            auditService.logAudit(usersDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+            auditService.logAudit(usersDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw e;
         }
     }
+
+
 
     @Transactional
     public User updateUser(Integer id, UserUpdateDto userUpdateDto, HttpServletRequest request) {
@@ -152,7 +183,6 @@ public class UserService {
         }
 
         statusCode = HttpStatus.OK.value();
-
         auditService.logAudit(userSearchDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         List<UsersDto> userDtos = users.getContent().stream()
@@ -160,7 +190,7 @@ public class UserService {
                         .userId(user.getUserId())
                         .fullName(user.getFullName())
                         .email(user.getEmail())
-                        .profileId(user.getProfile().getProfileId())
+                        .profileId(user.getProfile() != null ? user.getProfile().getProfileId() : null)
                         .dateOfBirth(user.getDateOfBirth())
                         .status(user.getStatus())
                         .build())
@@ -177,7 +207,7 @@ public class UserService {
     }
 
     @Transactional
-    public User findByIdUser(Integer userId, HttpServletRequest request) {
+    public UsersDto findByIdUser(Integer userId, HttpServletRequest request) {
         User user = userRepository.findById(userId).orElse(null);
 
         if (user == null) {
@@ -187,9 +217,18 @@ public class UserService {
         }
 
         statusCode = HttpStatus.OK.value();
-        auditService.logAudit(user, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+        auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
-        return user;
+        UsersDto usersDto = UsersDto.builder()
+                .userId(user.getUserId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .profileId(user.getProfile() != null ? user.getProfile().getProfileId() : null)
+                .dateOfBirth(user.getDateOfBirth())
+                .status(user.getStatus())
+                .build();
+
+        return usersDto;
     }
 
     public User toggleUserStatus(Integer userId) {

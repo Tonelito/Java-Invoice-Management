@@ -1,38 +1,36 @@
 package com.is4tech.invoicemanagement.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.is4tech.invoicemanagement.annotations.EntityName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-
 
 @Getter
 @Setter
 @Builder
+@EntityName("Users")
 public class UserUpdateDto {
 
-    @JsonIgnore
+    @Schema(hidden = true)
     private Integer userId;
-
-    @JsonIgnore
+    @Schema(hidden = true)
     private String email;
-
-    @JsonIgnore
+    @Schema(hidden = true)
     private String password;
-
-    @NotBlank(message = "El nombre completo es obligatorio")
+    @NotNull(message = "[Nombre completo] no debe de ser nulo.")
+    @NotBlank(message = "[Nombre completo] no debe estar en blanco.")
+    @Size(max = 100, message = "[Nombre completo] no puede tener más de 100 caracteres.")
     private String fullName;
-
+    @NotNull(message = "[Id del perfil] no debe de ser nulo.")
+    @Positive(message = "[Id del perfil] debe de ser un número positivo.")
     private Integer profileId;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date dateOfBirth;
-
-    @JsonIgnore
-    private Boolean status = true;
+    @Schema(hidden = true)
+    private Boolean status;
 }

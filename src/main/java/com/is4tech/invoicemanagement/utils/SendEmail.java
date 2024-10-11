@@ -79,114 +79,173 @@ public class SendEmail {
   }
 
   private String htmlSend(String email, String password) {
-    return "<!DOCTYPE html>\n" +
-            "<html lang='es'>\n" +
-            "<head>\n" +
-            "  <meta charset='UTF-8'>\n" +
-            "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
-            "  <title>Credenciales</title>\n" +
-            "  <style>\n" +
-            "    body {\n" +
-            "      font-family: Arial, sans-serif;\n" +
-            "      background-color: #f2f2f2;\n" +
-            "      color: #333;\n" +
-            "      margin: 0;\n" +
-            "      padding: 0;\n" +
-            "    }\n" +
-            "    .email-container {\n" +
-            "      display: flex;\n" +
-            "      justify-content: center;\n" +
-            "      align-items: center;\n" +
-            "      min-height: 100vh;\n" +
-            "    }\n" +
-            "    .card {\n" +
-            "      background-color: #ffffff;\n" +
-            "      width: 350px;\n" +
-            "      border-radius: 10px;\n" +
-            "      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);\n" +
-            "      padding: 20px;\n" +
-            "      text-align: center;\n" +
-            "    }\n" +
-            "    .header-triangle {\n" +
-            "      width: 0;\n" +
-            "      height: 0;\n" +
-            "      border-left: 50px solid transparent;\n" +
-            "      border-right: 50px solid transparent;\n" +
-            "      border-bottom: 30px solid #ff5733;\n" +
-            "      margin: 0 auto;\n" +
-            "    }\n" +
-            "    h1 {\n" +
-            "      font-size: 24px;\n" +
-            "      margin: 10px 0;\n" +
-            "      color: #ff5733;\n" +
-            "    }\n" +
-            "    p {\n" +
-            "      font-size: 16px;\n" +
-            "      color: #333;\n" +
-            "    }\n" +
-            "    hr {\n" +
-            "      border: none;\n" +
-            "      border-top: 2px solid #ff5733;\n" +
-            "      margin: 20px 0;\n" +
-            "      width: 80%;\n" +
-            "    }\n" +
-            "    table {\n" +
-            "      width: 100%;\n" +
-            "      margin: 20px 0;\n" +
-            "      text-align: left;\n" +
-            "      color: #333;\n" +
-            "    }\n" +
-            "    table td {\n" +
-            "      padding: 8px 0;\n" +
-            "      font-size: 14px;\n" +
-            "    }\n" +
-            "    a {\n" +
-            "      color: #007bff;\n" +
-            "      text-decoration: none;\n" +
-            "    }\n" +
-            "    a:hover {\n" +
-            "      text-decoration: underline;\n" +
-            "    }\n" +
-            "    .footer-triangle {\n" +
-            "      width: 0;\n" +
-            "      height: 0;\n" +
-            "      border-left: 50px solid transparent;\n" +
-            "      border-right: 50px solid transparent;\n" +
-            "      border-top: 30px solid #ff5733;\n" +
-            "      margin: 20px auto 0;\n" +
-            "    }\n" +
-            "    .footer-text {\n" +
-            "      font-size: 12px;\n" +
-            "      color: #666;\n" +
-            "      margin-top: 10px;\n" +
-            "    }\n" +
-            "  </style>\n" +
-            "</head>\n" +
-            "<body>\n" +
-            "  <div class='email-container'>\n" +
-            "    <div class='card'>\n" +
-            "      <div class='header-triangle'></div>\n" +
-            "      <h1>CREDENCIALES</h1>\n" +
-            "      <p>¡Te damos la bienvenida a Facturación!</p>\n" +
-            "      <hr>\n" +
-            "      <table>\n" +
-            "        <tr>\n" +
-            "          <td><strong>Su correo es:</strong></td>\n" +
-            "          <td><a href='mailto:" + email + "'>" + email + "</a></td>\n" +
-            "        </tr>\n" +
-            "        <tr>\n" +
-            "          <td><strong>Su contraseña es:</strong></td>\n" +
-            "          <td>" + password + "</td>\n" +
-            "        </tr>\n" +
-            "      </table>\n" +
-            "      <p>Si desea cambiar su contraseña, podrá hacerlo en ajustes de la página.</p>\n" +
-            "      <div class='footer-triangle'></div>\n" +
-            "      <p class='footer-text'>&copy; 2024 Facturación. Todos los derechos reservados.</p>\n" +
-            "    </div>\n" +
-            "  </div>\n" +
-            "</body>\n" +
-            "</html>";
-}
+      return "<!DOCTYPE html>\n" +
+              "<html lang='es'>\n" +
+              "<head>\n" +
+              "  <meta charset='UTF-8'>\n" +
+              "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
+              "  <title>Sus Credenciales de Acceso - ¡Bienvenido!</title>\n" +
+              "  <style>\n" +
+              "    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');\n" +
+              "    body {\n" +
+              "      font-family: 'Outfit', sans-serif;\n" +
+              "      line-height: 1.6;\n" +
+              "      color: #1f2937;\n" +
+              "      background-color: #ffffff;\n" +
+              "      margin: 0;\n" +
+              "      padding: 20px;\n" +
+              "    }\n" +
+              "    .container {\n" +
+              "      max-width: 600px;\n" +
+              "      margin: 0 auto;\n" +
+              "      background-color: #ffffff;\n" +
+              "      border-radius: 24px;\n" +
+              "      overflow: hidden;\n" +
+              "      box-shadow: 0 20px 40px rgba(0,0,0,0.1);\n" +
+              "      position: relative;\n" +
+              "    }\n" +
+              "    .container::before {\n" +
+              "      content: '';\n" +
+              "      position: absolute;\n" +
+              "      top: 0;\n" +
+              "      left: 0;\n" +
+              "      right: 0;\n" +
+              "      height: 10px;\n" +
+              "      background: linear-gradient(90deg, #4f46e5, #10b981, #3b82f6);\n" +
+              "    }\n" +
+              "    .header {\n" +
+              "      background-color: #4f46e5;\n" +
+              "      text-align: center;\n" +
+              "      padding: 40px 20px;\n" +
+              "      color: #ffffff;\n" +
+              "      position: relative;\n" +
+              "      overflow: hidden;\n" +
+              "    }\n" +
+              "    .header h1 {\n" +
+              "      margin: 0;\n" +
+              "      font-size: 32px;\n" +
+              "      font-weight: 600;\n" +
+              "      letter-spacing: -0.5px;\n" +
+              "    }\n" +
+              "    .content {\n" +
+              "      padding: 40px;\n" +
+              "    }\n" +
+              "    .credentials {\n" +
+              "      background-color: #f0fdf4;\n" +
+              "      border: 2px solid #10b981;\n" +
+              "      border-radius: 16px;\n" +
+              "      padding: 30px;\n" +
+              "      margin-bottom: 30px;\n" +
+              "      text-align: center;\n" +
+              "      box-shadow: 0 10px 20px rgba(16,185,129,0.1);\n" +
+              "    }\n" +
+              "    .credentials h2 {\n" +
+              "      margin-top: 0;\n" +
+              "      font-size: 26px;\n" +
+              "      font-weight: 600;\n" +
+              "      color: #047857;\n" +
+              "    }\n" +
+              "    .credentials p {\n" +
+              "      margin: 15px 0;\n" +
+              "      font-size: 20px;\n" +
+              "      color: #1f2937;\n" +
+              "    }\n" +
+              "    .button {\n" +
+              "      display: inline-block;\n" +
+              "      background: linear-gradient(90deg, #4f46e5, #3b82f6);\n" +
+              "      color: #ffffff;\n" +
+              "      text-decoration: none;\n" +
+              "      padding: 15px 30px;\n" +
+              "      border-radius: 50px;\n" +
+              "      font-size: 18px;\n" +
+              "      font-weight: 600;\n" +
+              "      margin-top: 20px;\n" +
+              "      transition: all 0.3s ease;\n" +
+              "      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);\n" +
+              "    }\n" +
+              "    .button:hover {\n" +
+              "      transform: translateY(-3px);\n" +
+              "      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.6);\n" +
+              "    }\n" +
+              "    .features {\n" +
+              "      display: flex;\n" +
+              "      justify-content: space-around;\n" +
+              "      margin-top: 40px;\n" +
+              "      gap: 20px;\n" +
+              "    }\n" +
+              "    .feature {\n" +
+              "      text-align: center;\n" +
+              "      flex-basis: 30%;\n" +
+              "      padding: 24px;\n" +
+              "      background-color: #ffffff;\n" +
+              "      border-radius: 16px;\n" +
+              "      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);\n" +
+              "    }\n" +
+              "    .feature img {\n" +
+              "      height: 64px;\n" +
+              "      width: 64px;\n" +
+              "      margin-bottom: 20px;\n" +
+              "    }\n" +
+              "    .feature h3 {\n" +
+              "      font-size: 1.5rem;\n" +
+              "      margin-bottom: 10px;\n" +
+              "      color: #6200ea;\n" +
+              "    }\n" +
+              "    .feature p {\n" +
+              "      color: #333;\n" +
+              "    }\n" +
+              "    .footer {\n" +
+              "      background-color: #f9fafb;\n" +
+              "      color: #6b7280;\n" +
+              "      text-align: center;\n" +
+              "      padding: 20px;\n" +
+              "      font-size: 14px;\n" +
+              "      border-top: 1px solid #e5e7eb;\n" +
+              "    }\n" +
+              "    .toggle-password {\n" +
+              "      cursor: pointer;\n" +
+              "    }\n" +
+              "  </style>\n" +
+              "</head>\n" +
+              "<body>\n" +
+              "  <div class='container'>\n" +
+              "    <div class='header'>\n" +
+              "      <h1>¡Bienvenido a Nuestro Sistema de Facturación!</h1>\n" +
+              "    </div>\n" +
+              "    <div class='content'>\n" +
+              "      <p>Estimado usuario,</p>\n" +
+              "      <p>Nos complace darle la bienvenida a nuestro sistema de facturación. A continuación, encontrará sus credenciales de acceso:</p>\n" +
+              "      <div class='credentials'>\n" +
+              "        <h2>Sus Credenciales de Acceso</h2>\n" +
+              "        <p><strong>Email:</strong> " + email + "</p>\n" +
+              "        <p><strong>Contraseña:</strong> <span id='password'  style='color: red; font-size: 30px;'>" + password + "</span>\n" +
+              "      </div>\n" +
+              "      <center><a href='#' class='button'>¡Acceder al Sistema!</a></center>\n" +
+              "    </div>\n" +
+              "    <div class='features'>\n" +
+              "      <div class='feature'>\n" +
+              "        <img src='https://cdn-icons-png.flaticon.com/128/508/508250.png?height=64&width=64' alt='Icono de Facturación Rápida'>\n" +
+              "        <h3>Seguridad Garantizada</h3>\n" +
+              "        <p>Garantizamos que tus datos estén a salvo.</p>\n" +
+              "      </div>\n" +
+              "      <div class='feature'>\n" +
+              "        <img src='https://cdn-icons-png.flaticon.com/128/3029/3029337.png?height=64&width=64' alt='Icono de Reportes'>\n" +
+              "        <h3>Reportes Detallados</h3>\n" +
+              "        <p>Obtenga reportes de sus movimientos.</p>\n" +
+              "      </div>\n" +
+              "      <div class='feature'>\n" +
+              "        <img src='https://cdn-icons-png.flaticon.com/128/11494/11494033.png?height=64&width=64' alt='Icono de Soporte'>\n" +
+              "        <h3>Soporte 24/7</h3>\n" +
+              "        <p>Nuestro equipo está aquí para ayudarle.</p>\n" +
+              "      </div>\n" +
+              "    </div>\n" +
+              "    <div class='footer'>\n" +
+              "      <p>© 2024 Todos los derechos reservados.</p>\n" +
+              "    </div>\n" +
+              "  </div>\n" +
+              "</body>\n" +
+              "</html>";
+  }
 
 }
 
