@@ -5,10 +5,13 @@ import com.is4tech.invoicemanagement.dto.LoginDto;
 import com.is4tech.invoicemanagement.dto.UserChangePasswordDto;
 import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.dto.VerificCodeRequest;
+import com.is4tech.invoicemanagement.exception.EmailAlreadyExistsException;
 import com.is4tech.invoicemanagement.model.User;
+import com.is4tech.invoicemanagement.response.ErrorResponse;
 import com.is4tech.invoicemanagement.response.LoginResponse;
 import com.is4tech.invoicemanagement.service.JwtService;
 import com.is4tech.invoicemanagement.utils.Message;
+import com.is4tech.invoicemanagement.utils.PasswordValidator;
 import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
 import com.is4tech.invoicemanagement.utils.SendEmail;
 
@@ -45,8 +48,11 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) throws MessagingException {
-        usersDto.setStatus(true);
+        if (authenticationService.emailExists(usersDto.getEmail())) {
+            throw new EmailAlreadyExistsException("El correo ya está registrado");
+        }
 
+        usersDto.setStatus(true);
         User registeredUser = authenticationService.signup(usersDto);
 
         return ResponseEntity.ok(registeredUser);
@@ -99,6 +105,16 @@ public class AuthController {
         String response = sendEmail.verificCode(verificCodeRequest.getCodePassword());
 
         if (response.equals("Code valid")) {
+            String passwordValidationResult = PasswordValidator.validatePassword(verificCodeRequest.getCodePassword().getNewPassword());
+
+            if (!passwordValidationResult.isEmpty()) {
+                return new ResponseEntity<>(Message.builder()
+                        .note("Password validation failed")
+                        .object(passwordValidationResult)
+                        .build(),
+                        HttpStatus.BAD_REQUEST);
+            }
+
             String newPassword = passwordEncoder.encode(verificCodeRequest.getCodePassword().getNewPassword());
             authenticationService.updatePasswordCode(newPassword, verificCodeRequest.getEmail().getEmail());
             response = "The password modified successfully";
@@ -113,12 +129,24 @@ public class AuthController {
 
     @PostMapping("/change-password")
     public ResponseEntity<Message> changePassword(@RequestBody UserChangePasswordDto userChangePasswordDto) {
-        String message = "The password not modific";
+        String passwordValidationResult = PasswordValidator.validatePassword(userChangePasswordDto.getNewPassword());
+
+        if (!passwordValidationResult.equals("La contraseña es válida.")) {
+            return new ResponseEntity<>(Message.builder()
+                    .note("Password validation failed")
+                    .object(passwordValidationResult)
+                    .build(),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        String message = "The password not modified";
         User user = authenticationService.findByEmail(userChangePasswordDto.getEmail());
-        if(passwordEncoder.matches(userChangePasswordDto.getPassword(), user.getPassword())){
+
+        if (passwordEncoder.matches(userChangePasswordDto.getPassword(), user.getPassword())) {
             authenticationService.updatePasswordCode(passwordEncoder.encode(userChangePasswordDto.getNewPassword()), userChangePasswordDto.getEmail());
             message = "The password modified";
         }
+
         return new ResponseEntity<>(Message.builder()
                 .note("Code verification result")
                 .object(message)
