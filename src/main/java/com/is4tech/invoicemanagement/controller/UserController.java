@@ -38,6 +38,12 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<Message> saveUser(@RequestBody @Valid UsersDto userDto, HttpServletRequest request) throws BadRequestException {
         try {
+            if (userService.emailExists(userDto.getEmail())) {
+                statusCode = HttpStatus.CONFLICT.value();
+                auditService.logAudit(userDto, this.getClass().getMethods()[0], new BadRequestException("El correo ya está registrado"), statusCode, NAME_ENTITY, request);
+                throw new BadRequestException("El correo ya está registrado");
+            }
+
             User savedUser = userService.saveUser(userDto, request);
 
             if (savedUser != null) {

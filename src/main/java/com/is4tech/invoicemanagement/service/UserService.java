@@ -241,6 +241,10 @@ public class UserService {
         return user;
     }
 
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
     public boolean existById(Integer userId) {
         return userRepository.existsById(userId);
     }

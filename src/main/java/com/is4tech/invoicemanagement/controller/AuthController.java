@@ -5,7 +5,9 @@ import com.is4tech.invoicemanagement.dto.LoginDto;
 import com.is4tech.invoicemanagement.dto.UserChangePasswordDto;
 import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.dto.VerificCodeRequest;
+import com.is4tech.invoicemanagement.exception.EmailAlreadyExistsException;
 import com.is4tech.invoicemanagement.model.User;
+import com.is4tech.invoicemanagement.response.ErrorResponse;
 import com.is4tech.invoicemanagement.response.LoginResponse;
 import com.is4tech.invoicemanagement.service.JwtService;
 import com.is4tech.invoicemanagement.utils.Message;
@@ -46,8 +48,11 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) throws MessagingException {
-        usersDto.setStatus(true);
+        if (authenticationService.emailExists(usersDto.getEmail())) {
+            throw new EmailAlreadyExistsException("El correo ya está registrado");
+        }
 
+        usersDto.setStatus(true);
         User registeredUser = authenticationService.signup(usersDto);
 
         return ResponseEntity.ok(registeredUser);

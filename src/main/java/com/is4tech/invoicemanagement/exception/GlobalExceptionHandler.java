@@ -1,5 +1,6 @@
 package com.is4tech.invoicemanagement.exception;
 
+import com.is4tech.invoicemanagement.response.ErrorResponse;
 import com.is4tech.invoicemanagement.service.AuditService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -58,5 +59,11 @@ public class GlobalExceptionHandler {
                                                         WebRequest webRequest) {
         ApiResponse apiResponse = new ApiResponse("An error occurred: " + exception.getMessage(), webRequest.getDescription(false));
         return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 }
