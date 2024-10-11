@@ -189,7 +189,7 @@ public class RolService {
             .rolId(rol.getRolId())
             .name(rol.getName())
             .code(rol.getCode())
-            .status(rol.getStatus())
+            .status(true)
             .build();
     }
 }

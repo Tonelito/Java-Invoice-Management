@@ -33,7 +33,7 @@ public class ApplicationConfiguration {
 
             List<GrantedAuthority> authorities = user.getProfile().getRoles()
                     .stream()
-                    .map(profileRoleDetail -> new SimpleGrantedAuthority(profileRoleDetail.getRole().getName()))
+                    .map(profileRoleDetail -> new SimpleGrantedAuthority(profileRoleDetail.getRole().getCode()))
                     .collect(Collectors.toList());
 
             return new org.springframework.security.core.userdetails.User(

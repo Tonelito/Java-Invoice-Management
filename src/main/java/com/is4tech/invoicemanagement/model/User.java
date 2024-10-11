@@ -1,6 +1,7 @@
 package com.is4tech.invoicemanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -50,6 +51,7 @@ public class User implements UserDetails {
     private Profile profile;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return profile.getRoles().stream()
                 .map(profileRoleDetail -> new SimpleGrantedAuthority(profileRoleDetail.getRole().getCode()))

@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class CodeRecoveryDto {
+
     private Integer codeRecoveryId;
     private String code;
     private Date expirationDate;

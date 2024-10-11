@@ -2,8 +2,7 @@ package com.is4tech.invoicemanagement.dto;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,9 +15,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class ProfileRoleDetailDtoId {
-    
+
+    @Schema(hidden = true)
     private Integer profileId;
-    @JsonIgnore
+    @Schema(hidden = true)
     private Integer roleId;
     private List<Integer> rols;
 }
