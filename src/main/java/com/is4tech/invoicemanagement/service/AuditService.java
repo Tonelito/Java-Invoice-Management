@@ -120,6 +120,37 @@ public class AuditService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public MessagePage findAllAudits(Pageable pageable) {
+        Page<Audit> auditsPage = auditRepository.findAll(pageable);
+
+        if (auditsPage.isEmpty()) {
+            throw new ResourceNorFoundException("Auditorías");
+        }
+
+        List<AuditDto> auditDtos = auditsPage.getContent().stream()
+                .map(audit -> AuditDto.builder()
+                        .auditId(audit.getAuditId())
+                        .entity(audit.getEntity())
+                        .request(audit.getRequest())
+                        .statusCode(audit.getStatusCode())
+                        .errorMessage(audit.getErrorMessage())
+                        .datetime(audit.getDatetime())
+                        .operation(audit.getOperation())
+                        .userId(audit.getUser().getUserId())
+                        .fullName(audit.getUser().getFullName())
+                        .build())
+                .collect(Collectors.toList());
+
+        return MessagePage.builder()
+                .note("Auditorías encontradas")
+                .object(auditDtos)
+                .totalElements((int) auditsPage.getTotalElements())
+                .totalPages(auditsPage.getTotalPages())
+                .currentPage(auditsPage.getNumber())
+                .pageSize(auditsPage.getSize())
+                .build();
+    }
 
     private String formatRequestToJson(Object object) {
         if (object == null) {

@@ -29,4 +29,10 @@ public class AuditController {
 
         return ResponseEntity.ok(messagePage);
     }
+
+    @GetMapping("/show-all")
+    public ResponseEntity<MessagePage> getAllAudits(Pageable pageable) {
+        MessagePage messagePage = auditService.findAllAudits(pageable);
+        return ResponseEntity.ok(messagePage);
+    }
 }
