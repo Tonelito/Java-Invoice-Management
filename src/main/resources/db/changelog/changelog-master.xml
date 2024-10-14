@@ -308,4 +308,40 @@
             newColumnName="code" 
             columnDataType="varchar(50)"/>
     </changeSet>
+
+    <changeSet id="20241009-2" author="dalvarado">
+        <createTable tableName="report">
+            <column name="no_ordered" type="int" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_report_id"/>
+            </column>
+            <column name="customer_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="decimal"/>
+            <column name="taxes" type="decimal"/>
+            <column name="total" type="decimal"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="report"
+                        baseColumnNames="customer_id"
+                        constraintName="FK_customer_report"
+                        referencedTableName="customer"
+                        referencedColumnNames="customer_id"/>
+    </changeSet>
+
+    <changeSet id="20241011-1" author="dalvarado">
+        <addColumn tableName="detail_invoice_products">
+            <column name="invoice_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="detail_invoice_products"
+                             baseColumnNames="invoice_id"
+                             constraintName="FK_invoice_detail_invoice_products"
+                             referencedTableName="invoice"
+                             referencedColumnNames="invoice_id"/>
+    </changeSet>
+
+    <changeSet id="20241011-2" author="dalvarado">
+        <addColumn tableName="detail_invoice_products">
+            <column name="amount" type="int"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

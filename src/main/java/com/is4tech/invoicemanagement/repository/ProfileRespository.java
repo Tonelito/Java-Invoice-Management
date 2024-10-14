@@ -10,5 +10,5 @@ import com.is4tech.invoicemanagement.model.Profile;
 @Repository
 public interface ProfileRespository extends JpaRepository<Profile, Integer> {
 
-    Page<Profile> findByName(String name, Pageable pageable);
+    Page<Profile> findByNameContaining(String name, Pageable pageable);
 }

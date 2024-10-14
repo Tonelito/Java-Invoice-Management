@@ -59,9 +59,8 @@ public class AuthService {
                 "Credentails",
                 password);
 
-        User userSave = userRepository.save(user);
 
-        return userSave;
+        return userRepository.save(user);
     }
 
     public User authenticate(LoginDto input) {

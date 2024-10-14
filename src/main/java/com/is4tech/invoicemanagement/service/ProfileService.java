@@ -87,35 +87,36 @@ public class ProfileService {
   }
 
   @Transactional(readOnly = true)
-  public MessagePage findByNameProfile(NameSearchDto nameSearchDto, Pageable pageable, HttpServletRequest request) {
-    if (nameSearchDto == null || nameSearchDto.getName() == null) {
-      throw new BadRequestException("Profile name cannot be null or empty");
-    } 
-    String name = nameSearchDto.getName();
-    Page<Profile> profiles = profileRespository.findByName(name, pageable);
-
-    if (profiles.isEmpty()) {
-      int statusCode = HttpStatus.NOT_FOUND.value();
-      auditService.logAudit(name, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
-      throw new ResourceNorFoundException("Profile", "Name", name);
-    }
-
-    int statusCode = HttpStatus.OK.value();
-    auditService.logAudit(name, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
-
-    List<ProfileDto> profileDtos = profiles.getContent().stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-
-    return MessagePage.builder()
-      .note("Profiles Found")
-      .object(profileDtos)
-      .totalElements((int) profiles.getTotalElements())
-      .totalPages(profiles.getTotalPages())
-      .currentPage(profiles.getNumber())
-      .pageSize(profiles.getSize())
-      .build();
+  public MessagePage findByNameProfile(String nameShearchDto, Pageable pageable, HttpServletRequest request) {
+      if (nameShearchDto == null || nameShearchDto.isEmpty()) {
+          throw new BadRequestException("Profile name cannot be null or empty");
+      } 
+  
+      Page<Profile> profiles = profileRespository.findByNameContaining(nameShearchDto, pageable);
+  
+      if (profiles.isEmpty()) {
+          int statusCode = HttpStatus.NOT_FOUND.value();
+          auditService.logAudit(nameShearchDto, this.getClass().getMethods()[0], null, statusCode, "Profile", request);
+          throw new ResourceNorFoundException("Profile", "Name", nameShearchDto);
+      }
+  
+      int statusCode = HttpStatus.OK.value();
+      auditService.logAudit(nameShearchDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
+  
+      List<ProfileDto> profileDtos = profiles.getContent().stream()
+              .map(this::toDto)
+              .collect(Collectors.toList());
+  
+      return MessagePage.builder()
+        .note("Profiles Found")
+        .object(profileDtos)
+        .totalElements((int) profiles.getTotalElements())
+        .totalPages(profiles.getTotalPages())
+        .currentPage(profiles.getNumber())
+        .pageSize(profiles.getSize())
+        .build();
   }
+  
 
   @Transactional
   public void deleteProfile(ProfileDto profileDto, HttpServletRequest request) {

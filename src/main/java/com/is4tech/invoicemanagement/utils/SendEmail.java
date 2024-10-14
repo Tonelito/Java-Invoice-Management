@@ -2,7 +2,6 @@ package com.is4tech.invoicemanagement.utils;
 
 import java.util.Date;
 
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,19 +31,20 @@ public class SendEmail {
       helper.setTo(destination);
       helper.setFrom(from);
       helper.setSubject(subject);
-      helper.setText(htmlSend(destination, password), true);
+      helper.setText(htmlSend(destination, password, true), true);
   
       mail.send(mimeMessage);
   }
   
 
-  public void sendEmailRestorationCode(String destination, String from, String subjet, String text, String codigoRestauraciong) {
-    SimpleMailMessage emailMessage = new SimpleMailMessage();
-    emailMessage.setTo(destination);
-    emailMessage.setFrom(from);
-    emailMessage.setSubject(subjet);
-    emailMessage.setText(text);
-    mail.send(emailMessage);
+  public void sendEmailRestorationCode(String destination, String from, String subjet, String codigoRestauraciong) throws MessagingException {
+    MimeMessage mimeMessage = mail.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+    helper.setTo(destination);
+    helper.setFrom(from);
+    helper.setSubject(subjet);
+    helper.setText(htmlSend(null, codigoRestauraciong, false), true);
+    mail.send(mimeMessage);
 
     CodeRecoveryDto codeRecoveryDto = CodeRecoveryDto.builder()
       .code(codigoRestauraciong)
@@ -78,7 +78,22 @@ public class SendEmail {
     }
   }
 
-  private String htmlSend(String email, String password) {
+  private String htmlSend(String email, String password, boolean mostrarCredenciales) {
+    String credentialsSection = "";
+    if (mostrarCredenciales) {
+        credentialsSection = 
+              "      <div class='credentials'>\n" +
+              "        <h2>Sus Credenciales de Acceso</h2>\n" +
+              "        <p><strong>Email:</strong> " + email + "</p>\n" +
+              "        <p><strong>Contraseña:</strong> <span id='password' style='color: red; font-size: 30px;'>" + password + "</span>\n" +
+              "      </div>\n";
+    } else {
+        credentialsSection = 
+              "      <div class='credentials'>\n" +
+              "        <h2>Su Código de Recuperación</h2>\n" +
+              "        <p><strong>Código:</strong> <span id='password' style='color: red; font-size: 30px;'>" + password + "</span>\n" +
+              "      </div>\n";
+    }
       return "<!DOCTYPE html>\n" +
               "<html lang='es'>\n" +
               "<head>\n" +
@@ -215,11 +230,7 @@ public class SendEmail {
               "    <div class='content'>\n" +
               "      <p>Estimado usuario,</p>\n" +
               "      <p>Nos complace darle la bienvenida a nuestro sistema de facturación. A continuación, encontrará sus credenciales de acceso:</p>\n" +
-              "      <div class='credentials'>\n" +
-              "        <h2>Sus Credenciales de Acceso</h2>\n" +
-              "        <p><strong>Email:</strong> " + email + "</p>\n" +
-              "        <p><strong>Contraseña:</strong> <span id='password'  style='color: red; font-size: 30px;'>" + password + "</span>\n" +
-              "      </div>\n" +
+              credentialsSection +
               "      <center><a href='#' class='button'>¡Acceder al Sistema!</a></center>\n" +
               "    </div>\n" +
               "    <div class='features'>\n" +

@@ -193,10 +193,10 @@ public class ProfileController {
     }
   }
 
-  @PostMapping("/show-by-name")
-  public ResponseEntity<MessagePage> showByNameProfile(@RequestBody NameSearchDto nameSearchDto, Pageable pageable, HttpServletRequest request) {
+  @GetMapping("/show-by-name/{nameShearchDto}")
+  public ResponseEntity<MessagePage> showByNameProfile(@PathVariable String nameShearchDto, Pageable pageable, HttpServletRequest request) {
     try {
-      MessagePage profileDto = profileService.findByNameProfile(nameSearchDto, pageable, request);
+      MessagePage profileDto = profileService.findByNameProfile(nameShearchDto, pageable, request);
       statusCode = HttpStatus.OK.value();
       return new ResponseEntity<>(profileDto, HttpStatus.OK);
     }catch (ResourceNorFoundException e) {

@@ -7,7 +7,6 @@ import com.is4tech.invoicemanagement.dto.UsersDto;
 import com.is4tech.invoicemanagement.dto.VerificCodeRequest;
 import com.is4tech.invoicemanagement.exception.EmailAlreadyExistsException;
 import com.is4tech.invoicemanagement.model.User;
-import com.is4tech.invoicemanagement.response.ErrorResponse;
 import com.is4tech.invoicemanagement.response.LoginResponse;
 import com.is4tech.invoicemanagement.service.JwtService;
 import com.is4tech.invoicemanagement.utils.Message;
@@ -78,7 +77,7 @@ public class AuthController {
     }
 
     @PostMapping("/recover-password")
-    public ResponseEntity<Message> recoverPassword(@RequestBody EmailDto emailDto) {
+    public ResponseEntity<Message> recoverPassword(@RequestBody EmailDto emailDto) throws MessagingException {
         authenticationService.findByEmail(emailDto.getEmail());
         String passwordCode = ResetCodeGenerator.getPassword(
                 ResetCodeGenerator.MINUSCULAS +
@@ -89,7 +88,6 @@ public class AuthController {
                 emailDto.getEmail(),
                 "infoFactura@facturacio.fac.com",
                 "Recovery Password",
-                "Your recovery code is: \n" + passwordCode,
                 passwordCode
         );
 
