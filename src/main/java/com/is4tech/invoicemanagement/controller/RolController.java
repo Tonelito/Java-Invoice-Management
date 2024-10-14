@@ -91,7 +91,7 @@ public class RolController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Message> deleteRol(@PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         try {
-            RolDto rolDelete = rolService.findByIdRol(id, request);
+            RolDto rolDelete = rolService.findByIdRol(id);
             rolService.deleteRol(rolDelete, request);
 
             return new ResponseEntity<>(Message.builder()
@@ -111,7 +111,7 @@ public class RolController {
     @GetMapping("/show-all")
     public ResponseEntity<MessagePage> showAllRoles(Pageable pageable, HttpServletRequest request){
         try {
-            MessagePage message = rolService.listAllRol(pageable, request);
+            MessagePage message = rolService.listAllRol(pageable);
             statusCode = HttpStatus.OK.value();
 
             return new ResponseEntity<>(message, HttpStatus.OK);
@@ -129,18 +129,13 @@ public class RolController {
     @PostMapping("/search")
     public ResponseEntity<MessagePage> searchRoles(@RequestBody NameSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) throws BadRequestException {
         try {
-            MessagePage messagePage = rolService.findByNameRol(roleSearchDto, pageable, request);
-            statusCode = HttpStatus.OK.value();
+            MessagePage messagePage = rolService.findByNameRol(roleSearchDto, pageable);
 
             return new ResponseEntity<>(messagePage, HttpStatus.OK);
 
         } catch (ResourceNorFoundException e) {
-            statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
             throw e;
         } catch (Exception e) {
-            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }

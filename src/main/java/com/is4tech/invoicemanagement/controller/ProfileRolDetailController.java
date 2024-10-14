@@ -59,9 +59,9 @@ public class ProfileRolDetailController {
             @RequestBody @Valid ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) throws BadRequestException {
         try {
             Integer profileId = profileRoleDetailDtoId.getProfileId();
-            ProfileDto profileDto = profileService.findByIdProfile(profileId, request);
+            ProfileDto profileDto = profileService.findByIdProfile(profileId);
             List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
-                    profileRoleDetailDtoId, request);
+                    profileRoleDetailDtoId);
 
             if (!(rolsId.isEmpty())) {
                 for (Integer rolsIdModific : rolsId) {
@@ -84,7 +84,7 @@ public class ProfileRolDetailController {
                             .roleId(rolId)
                             .build();
                     profileRoleDetailService.saveProfileRoleDetail(detailSave, request);
-                    RolDto rol = rolService.findByIdRol(rolId, request);
+                    RolDto rol = rolService.findByIdRol(rolId);
                     if (rol != null) {
                         rolsSaved.add(rol);
                     }
@@ -114,7 +114,7 @@ public class ProfileRolDetailController {
 
     @GetMapping("/show/rols/{idProfile}")
     public ResponseEntity<Message> showByIdProfile(@PathVariable Integer idProfile, HttpServletRequest request) {
-        List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(idProfile, request);
+        List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(idProfile);
 
         if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, idProfile.toString());
@@ -133,8 +133,8 @@ public class ProfileRolDetailController {
     }
 
     @GetMapping("/show-all")
-    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable, HttpServletRequest request) {
-        MessagePage profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable, request);
+    public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable) {
+        MessagePage profileRolDetailsId = profileRoleDetailService.listAllProfileRolDetail(pageable);
         return new ResponseEntity<>(Message.builder()
                 .note("Records found")
                 .object(profileRolDetailsId)
@@ -146,7 +146,7 @@ public class ProfileRolDetailController {
     public ResponseEntity<Message> deleteProfileRolDetail(@PathVariable Integer id, HttpServletRequest request) throws BadRequestException {
         try {
             if(profileService.existsById(id)){
-                List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id, request);
+                List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
                 List<Integer> rolsId = new ArrayList<>();
                 for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
                 rolsId.add(profilerRoleDetail.getRole().getRolId());

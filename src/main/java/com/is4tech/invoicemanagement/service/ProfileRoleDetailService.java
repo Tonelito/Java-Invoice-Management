@@ -50,12 +50,10 @@ public class ProfileRoleDetailService {
         this.rolService = rolService;
     }
 
-    public MessagePage listAllProfileRolDetail(Pageable pageable, HttpServletRequest request) {
+    public MessagePage listAllProfileRolDetail(Pageable pageable) {
         Page<ProfileRoleDetail> profileDetails = prdRespository.findAll(pageable);
 
         if (profileDetails.isEmpty()) {
-            int statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, "ProfileRolDetail", request);
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, pageable.toString());
         }
 
@@ -81,10 +79,6 @@ public class ProfileRoleDetailService {
         Page<ProfileRoleDetailDto> list = new PageImpl<>(profileRoleDetailDtos, pageable,
                 profileDetails.getTotalElements());
 
-        int statusCode = HttpStatus.OK.value();
-        auditService.logAudit(profileDetails.getContent(), this.getClass().getMethods()[0], null, statusCode,
-                "ProfileRolDetail", request);
-
         return MessagePage.builder()
                 .note("Profile Rol Detail Retrieved Successfully")
                 .object(list.getContent())
@@ -106,8 +100,8 @@ public class ProfileRoleDetailService {
                         profileRoleDetailDtoId.getRoleId().toString());
             }
 
-            Profile profile = toModelProfile(profileService.findByIdProfile(profileRoleDetailDtoId.getProfileId(), request));
-            Rol role = toModelRol(rolService.findByIdRol(profileRoleDetailDtoId.getRoleId(), request));
+            Profile profile = toModelProfile(profileService.findByIdProfile(profileRoleDetailDtoId.getProfileId()));
+            Rol role = toModelRol(rolService.findByIdRol(profileRoleDetailDtoId.getRoleId()));
             ProfileRoleDetail profileRoleDetail = ProfileRoleDetail.builder()
                     .id(ProfileRoleDetailId.builder()
                             .profileId(profileRoleDetailDtoId.getProfileId())
@@ -127,15 +121,11 @@ public class ProfileRoleDetailService {
             throw e;
         }
     }
-
     @Transactional(readOnly = true)
-    public ProfileRoleDetailDto finByIdProfileRoleDetail(ProfileRoleDetailId id, HttpServletRequest request) {
+    public ProfileRoleDetailDto finByIdProfileRoleDetail(ProfileRoleDetailId id) {
         ProfileRoleDetailDto profileRoleDetailDto = prdRespository.findById(id)
             .map(this::toDtoRols)
             .orElseThrow(() -> new ResourceNorFoundException("Role not found with ID: " + id));
-
-        int statusCode = HttpStatus.OK.value();
-        auditService.logAudit(profileRoleDetailDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         return profileRoleDetailDto;
     }
@@ -168,18 +158,16 @@ public class ProfileRoleDetailService {
     }
 
     public List<Integer> existByIdProfileRolNotIncluidesDetail(Integer profileId,
-            ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) {
+            ProfileRoleDetailDtoId profileRoleDetailDtoId) {
         List<Integer> rolsId = prdRespository.findByIdProfile(profileId);
         List<Integer> rolsIdCopy = new ArrayList<>(rolsId);
         rolsIdCopy.removeAll(profileRoleDetailDtoId.getRols());
         return rolsIdCopy;
     }
 
-    public List<ProfileRoleDetail> findByIdProfileRol(Integer profileId, HttpServletRequest request) {
+    public List<ProfileRoleDetail> findByIdProfileRol(Integer profileId) {
         List<ProfileRoleDetail> profileRoleDetailDto = prdRespository.findByIdProfileObject(profileId);
 
-        int statusCode = HttpStatus.OK.value();
-        auditService.logAudit(profileRoleDetailDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
         return profileRoleDetailDto;
     }
 

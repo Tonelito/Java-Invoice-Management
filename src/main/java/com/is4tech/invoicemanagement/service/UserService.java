@@ -44,18 +44,14 @@ public class UserService {
     int statusCode;
 
     @Transactional
-    public MessagePage listAllUsers(Pageable pageable, HttpServletRequest request) {
+    public MessagePage listAllUsers(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
 
         if (users.isEmpty()) {
-            statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, pageable.toString());
         }
 
         statusCode = HttpStatus.OK.value();
-
-        auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         List<UsersDto> userDtos = users.getContent().stream()
                 .map(user -> UsersDto.builder()
@@ -168,7 +164,7 @@ public class UserService {
     }
 
     @Transactional
-    public MessagePage findByName(UserSearchDto userSearchDto, Pageable pageable, HttpServletRequest request) {
+    public MessagePage findByName(UserSearchDto userSearchDto, Pageable pageable) {
         if (userSearchDto == null || userSearchDto.getFullName() == null) {
             throw new BadRequestException("UserSearchDto or fullName cannot be null");
         }
@@ -177,13 +173,8 @@ public class UserService {
         Page<User> users = userRepository.findByFullNameContainingIgnoreCase(name, pageable);
 
         if (users.isEmpty()) {
-            statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(userSearchDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
             throw new ResourceNorFoundException(NAME_ENTITY, "FullName", name);
         }
-
-        statusCode = HttpStatus.OK.value();
-        auditService.logAudit(userSearchDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         List<UsersDto> userDtos = users.getContent().stream()
                 .map(user -> UsersDto.builder()
@@ -211,13 +202,8 @@ public class UserService {
         User user = userRepository.findById(userId).orElse(null);
 
         if (user == null) {
-            statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, userId.toString());
         }
-
-        statusCode = HttpStatus.OK.value();
-        auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         UsersDto usersDto = UsersDto.builder()
                 .userId(user.getUserId())

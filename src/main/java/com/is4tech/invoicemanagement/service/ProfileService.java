@@ -35,18 +35,13 @@ public class ProfileService {
   }
 
   @Transactional
-  public MessagePage listAllProfile(Pageable pageable, HttpServletRequest request) {
+  public MessagePage listAllProfile(Pageable pageable) {
     Page<Profile> profiles = profileRespository.findAll(pageable);
 
     if (profiles.isEmpty()) {
-      int statusCode = HttpStatus.NOT_FOUND.value();
-      auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
       throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, pageable.toString());
     }
 
-    int statusCode = HttpStatus.OK.value();
-    auditService.logAudit(profiles.getContent(), this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
-    
     return MessagePage.builder()
         .note("Profiles Retrieved Successfully")
         .object(profiles.getContent().stream().map(this::toDto).toList())
@@ -75,19 +70,16 @@ public class ProfileService {
   }
 
   @Transactional(readOnly = true)
-  public ProfileDto findByIdProfile(Integer id, HttpServletRequest request) {
+  public ProfileDto findByIdProfile(Integer id) {
     ProfileDto profileDto = profileRespository.findById(id)
         .map(this::toDto)
         .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
-
-    int statusCode = HttpStatus.OK.value();
-    auditService.logAudit(profileDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
     return profileDto;
   }
 
   @Transactional(readOnly = true)
-  public MessagePage findByNameProfile(String nameShearchDto, Pageable pageable, HttpServletRequest request) {
+  public MessagePage findByNameProfile(String nameShearchDto, Pageable pageable) {
       if (nameShearchDto == null || nameShearchDto.isEmpty()) {
           throw new BadRequestException("Profile name cannot be null or empty");
       } 
@@ -95,13 +87,8 @@ public class ProfileService {
       Page<Profile> profiles = profileRespository.findByNameContaining(nameShearchDto, pageable);
   
       if (profiles.isEmpty()) {
-          int statusCode = HttpStatus.NOT_FOUND.value();
-          auditService.logAudit(nameShearchDto, this.getClass().getMethods()[0], null, statusCode, "Profile", request);
           throw new ResourceNorFoundException("Profile", "Name", nameShearchDto);
       }
-  
-      int statusCode = HttpStatus.OK.value();
-      auditService.logAudit(nameShearchDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
   
       List<ProfileDto> profileDtos = profiles.getContent().stream()
               .map(this::toDto)

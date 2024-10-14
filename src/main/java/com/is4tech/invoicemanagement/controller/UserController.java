@@ -110,38 +110,30 @@ public class UserController {
     }
 
     @GetMapping("/show-all")
-    public ResponseEntity<MessagePage> showAllUsers(Pageable pageable, HttpServletRequest request) {
+    public ResponseEntity<MessagePage> showAllUsers(Pageable pageable) {
         try {
-            MessagePage message = userService.listAllUsers(pageable, request);
+            MessagePage message = userService.listAllUsers(pageable);
             statusCode = HttpStatus.OK.value();
 
             return new ResponseEntity<>(message, HttpStatus.OK);
         } catch (ResourceNorFoundException e) {
-            statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw e;
         } catch (Exception e) {
-            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 
     @PostMapping("/search")
-    public ResponseEntity<MessagePage> searchUsers(@RequestBody UserSearchDto userSearchDto, Pageable pageable, HttpServletRequest request) {
+    public ResponseEntity<MessagePage> searchUsers(@RequestBody UserSearchDto userSearchDto, Pageable pageable) {
         try {
-            MessagePage message = userService.findByName(userSearchDto, pageable, request);
+            MessagePage message = userService.findByName(userSearchDto, pageable);
             statusCode = HttpStatus.OK.value();
 
             return new ResponseEntity<>(message, HttpStatus.OK);
 
         } catch (ResourceNorFoundException e) {
-            statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(userSearchDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw e;
         } catch (Exception e) {
-            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-            auditService.logAudit(userSearchDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
             throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }

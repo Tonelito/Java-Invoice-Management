@@ -24,7 +24,7 @@ public class AuditController {
                 auditSearchDto.getEntity(),
                 auditSearchDto.getStartDate(),
                 auditSearchDto.getEndDate(),
-                auditSearchDto.getUserId(),
+                auditSearchDto.getFullName(),
                 pageable);
 
         return ResponseEntity.ok(messagePage);

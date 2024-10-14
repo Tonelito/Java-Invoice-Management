@@ -120,7 +120,7 @@ public class ProfileController {
   public ResponseEntity<Message> statusChangeProfile(@PathVariable Integer id, HttpServletRequest request) {
     try {
       if (profileService.existsById(id)) {
-        ProfileDto profileUpdate = profileService.findByIdProfile(id, request);
+        ProfileDto profileUpdate = profileService.findByIdProfile(id);
         if (profileUpdate.getStatus()) {
           profileUpdate.setStatus(false);
         } else
@@ -146,7 +146,7 @@ public class ProfileController {
   public ResponseEntity<Message> deleteProfile(@PathVariable Integer id, HttpServletRequest request) {
     try {
       if(profileService.existsById(id)){
-        ProfileDto profileDelete = profileService.findByIdProfile(id, request);
+        ProfileDto profileDelete = profileService.findByIdProfile(id);
         profileService.deleteProfile(profileDelete, request);
       }else
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
@@ -166,7 +166,7 @@ public class ProfileController {
   @GetMapping("/show-by-id/{id}")
   public ResponseEntity<Message> showByIdProfile(@PathVariable Integer id, HttpServletRequest request) {
     try {
-      ProfileDto profileDto = profileService.findByIdProfile(id, request);
+      ProfileDto profileDto = profileService.findByIdProfile(id);
       if (profileDto == null)
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
       List<RolDto> rols = getAllRols(id, request);
@@ -196,7 +196,7 @@ public class ProfileController {
   @GetMapping("/show-by-name/{nameShearchDto}")
   public ResponseEntity<MessagePage> showByNameProfile(@PathVariable String nameShearchDto, Pageable pageable, HttpServletRequest request) {
     try {
-      MessagePage profileDto = profileService.findByNameProfile(nameShearchDto, pageable, request);
+      MessagePage profileDto = profileService.findByNameProfile(nameShearchDto, pageable);
       statusCode = HttpStatus.OK.value();
       return new ResponseEntity<>(profileDto, HttpStatus.OK);
     }catch (ResourceNorFoundException e) {
@@ -212,7 +212,7 @@ public class ProfileController {
 
   @GetMapping("/show-all")
   public ResponseEntity<Message> showAllProfiles(@PageableDefault(size = 10) Pageable pageable, HttpServletRequest request) {
-    MessagePage profiles = profileService.listAllProfile(pageable, request);
+    MessagePage profiles = profileService.listAllProfile(pageable);
     return new ResponseEntity<>(Message.builder()
         .note("Records found")
         .object(profiles)
@@ -229,7 +229,7 @@ public class ProfileController {
     List<RolDto> rols = new ArrayList();
     for (Integer roldId : profileDto.getRolsId()) {
       savedRolId(profileRoleDetailDtoId, request);
-      rols.add(rolService.findByIdRol(roldId, request));
+      rols.add(rolService.findByIdRol(roldId));
     }
     return rols;
   }
@@ -237,7 +237,7 @@ public class ProfileController {
   private void savedRolId(ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) {
     Integer profileId = profileRoleDetailDtoId.getProfileId();
     List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
-        profileRoleDetailDtoId, request);
+        profileRoleDetailDtoId);
 
     if (!(rolsId.isEmpty())) {
       for (Integer rolsIdModific : rolsId) {
@@ -258,7 +258,7 @@ public class ProfileController {
             .roleId(rolId)
             .build();
         profileRoleDetailService.saveProfileRoleDetail(detailSave, request);
-        RolDto rol = rolService.findByIdRol(rolId, request);
+        RolDto rol = rolService.findByIdRol(rolId);
         if (rol != null) {
           rolsSaved.add(rol);
         }
@@ -267,7 +267,7 @@ public class ProfileController {
   }
 
   private List<RolDto> getAllRols(Integer id, HttpServletRequest request){
-    List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id, request);
+    List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
     if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
     }

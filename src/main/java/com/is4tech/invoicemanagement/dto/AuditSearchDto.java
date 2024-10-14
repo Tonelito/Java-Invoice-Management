@@ -20,5 +20,5 @@ public class AuditSearchDto {
     private LocalDate startDate;
     @NotNull(message = "[Fecha fin] no debe de ser nula.")
     private LocalDate endDate;
-    private Integer userId;
+    private String fullName;
 }

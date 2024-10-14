@@ -43,7 +43,7 @@ public class SendEmail {
     helper.setTo(destination);
     helper.setFrom(from);
     helper.setSubject(subjet);
-    helper.setText(htmlSend(null, codigoRestauraciong, false), true);
+    helper.setText(htmlRestorationCode(codigoRestauraciong), true);
     mail.send(mimeMessage);
 
     CodeRecoveryDto codeRecoveryDto = CodeRecoveryDto.builder()
@@ -79,21 +79,6 @@ public class SendEmail {
   }
 
   private String htmlSend(String email, String password, boolean mostrarCredenciales) {
-    String credentialsSection = "";
-    if (mostrarCredenciales) {
-        credentialsSection = 
-              "      <div class='credentials'>\n" +
-              "        <h2>Sus Credenciales de Acceso</h2>\n" +
-              "        <p><strong>Email:</strong> " + email + "</p>\n" +
-              "        <p><strong>Contraseña:</strong> <span id='password' style='color: red; font-size: 30px;'>" + password + "</span>\n" +
-              "      </div>\n";
-    } else {
-        credentialsSection = 
-              "      <div class='credentials'>\n" +
-              "        <h2>Su Código de Recuperación</h2>\n" +
-              "        <p><strong>Código:</strong> <span id='password' style='color: red; font-size: 30px;'>" + password + "</span>\n" +
-              "      </div>\n";
-    }
       return "<!DOCTYPE html>\n" +
               "<html lang='es'>\n" +
               "<head>\n" +
@@ -230,7 +215,11 @@ public class SendEmail {
               "    <div class='content'>\n" +
               "      <p>Estimado usuario,</p>\n" +
               "      <p>Nos complace darle la bienvenida a nuestro sistema de facturación. A continuación, encontrará sus credenciales de acceso:</p>\n" +
-              credentialsSection +
+              "      <div class='credentials'>\n" +
+              "        <h2>Sus Credenciales de Acceso</h2>\n" +
+              "        <p><strong>Email:</strong> " + email + "</p>\n" +
+              "        <p><strong>Contraseña:</strong> <span id='password' style='color: red; font-size: 30px;'>" + password + "</span>\n" +
+              "      </div>\n" +
               "      <center><a href='#' class='button'>¡Acceder al Sistema!</a></center>\n" +
               "    </div>\n" +
               "    <div class='features'>\n" +
@@ -258,5 +247,108 @@ public class SendEmail {
               "</html>";
   }
 
+  private String htmlRestorationCode(String codigoRestauracion) {
+    return "<!DOCTYPE html>\n" +
+            "<html lang='es'>\n" +
+            "<head>\n" +
+            "  <meta charset='UTF-8'>\n" +
+            "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
+            "  <title>Restauración de Contraseña</title>\n" +
+            "  <style>\n" +
+            "    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');\n" +
+            "    body {\n" +
+            "      font-family: 'Outfit', sans-serif;\n" +
+            "      line-height: 1.6;\n" +
+            "      color: #1f2937;\n" +
+            "      background-color: #ffffff;\n" +
+            "      margin: 0;\n" +
+            "      padding: 20px;\n" +
+            "    }\n" +
+            "    .container {\n" +
+            "      max-width: 600px;\n" +
+            "      margin: 0 auto;\n" +
+            "      background-color: #ffffff;\n" +
+            "      border-radius: 24px;\n" +
+            "      overflow: hidden;\n" +
+            "      box-shadow: 0 20px 40px rgba(0,0,0,0.1);\n" +
+            "      position: relative;\n" +
+            "    }\n" +
+            "    .container::before {\n" +
+            "      content: '';\n" +
+            "      position: absolute;\n" +
+            "      top: 0;\n" +
+            "      left: 0;\n" +
+            "      right: 0;\n" +
+            "      height: 10px;\n" +
+            "      background: linear-gradient(90deg, #4f46e5, #10b981, #3b82f6);\n" +
+            "    }\n" +
+            "    .header {\n" +
+            "      background-color: #4f46e5;\n" +
+            "      text-align: center;\n" +
+            "      padding: 40px 20px;\n" +
+            "      color: #ffffff;\n" +
+            "      position: relative;\n" +
+            "      overflow: hidden;\n" +
+            "    }\n" +
+            "    .header h1 {\n" +
+            "      margin: 0;\n" +
+            "      font-size: 32px;\n" +
+            "      font-weight: 600;\n" +
+            "      letter-spacing: -0.5px;\n" +
+            "    }\n" +
+            "    .content {\n" +
+            "      padding: 40px;\n" +
+            "    }\n" +
+            "    .credentials {\n" +
+            "      background-color: #f0fdf4;\n" +
+            "      border: 2px solid #10b981;\n" +
+            "      border-radius: 16px;\n" +
+            "      padding: 30px;\n" +
+            "      margin-bottom: 30px;\n" +
+            "      text-align: center;\n" +
+            "      box-shadow: 0 10px 20px rgba(16,185,129,0.1);\n" +
+            "    }\n" +
+            "    .credentials h2 {\n" +
+            "      margin-top: 0;\n" +
+            "      font-size: 26px;\n" +
+            "      font-weight: 600;\n" +
+            "      color: #047857;\n" +
+            "    }\n" +
+            "    .credentials p {\n" +
+            "      margin: 15px 0;\n" +
+            "      font-size: 20px;\n" +
+            "      color: #1f2937;\n" +
+            "    }\n" +
+            "    .footer {\n" +
+            "      background-color: #f9fafb;\n" +
+            "      color: #6b7280;\n" +
+            "      text-align: center;\n" +
+            "      padding: 20px;\n" +
+            "      font-size: 14px;\n" +
+            "      border-top: 1px solid #e5e7eb;\n" +
+            "    }\n" +
+            "  </style>\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "  <div class='container'>\n" +
+            "    <div class='header'>\n" +
+            "      <h1>¡Recupera tu Cuenta!</h1>\n" +
+            "    </div>\n" +
+            "    <div class='content'>\n" +
+            "      <p>Estimado usuario,</p>\n" +
+            "      <p>Hemos recibido una solicitud para restablecer su contraseña. Utilice el siguiente código de recuperación:</p>\n" +
+            "      <div class='credentials'>\n" +
+            "        <h2>Código de Restauración</h2>\n" +
+            "        <p><strong>Código:</strong> <span id='codigo' style='color: red; font-size: 30px;'>" + codigoRestauracion + "</span></p>\n" +
+            "      </div>\n" +
+            "      <p>Por favor, copie el código anterior y regrese a la página para ingresarlo en el apartado donde se solicita.</p>\n" +
+            "    </div>\n" +
+            "    <div class='footer'>\n" +
+            "      <p>Si no solicitó este cambio, puede ignorar este correo.</p>\n" +
+            "    </div>\n" +
+            "  </div>\n" +
+            "</body>\n" +
+            "</html>\n";
+    }
 }
 

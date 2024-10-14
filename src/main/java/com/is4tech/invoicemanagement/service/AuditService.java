@@ -85,11 +85,15 @@ public class AuditService {
     }
 
     @Transactional(readOnly = true)
-    public MessagePage findByEntityAndDateRangeAndOptionalUserId(String entity, LocalDate startDate, LocalDate endDate, Integer userId, Pageable pageable) {
-        Page<Audit> auditsPage = auditRepository.findByEntityAndDateRangeAndOptionalUserId(entity, startDate, endDate, userId, pageable);
+    public MessagePage findByEntityAndDateRangeAndOptionalUserId(String entity, LocalDate startDate, LocalDate endDate, String fullName, Pageable pageable) {
+        Page<Audit> auditsPage = auditRepository.findByEntityAndDateRangeAndOptionalFullName(entity, startDate, endDate, fullName, pageable);
 
         if (auditsPage.isEmpty()) {
-            throw new ResourceNorFoundException("Audit", "Entity", entity);
+            if (fullName != null && !fullName.isEmpty()) {
+                throw ResourceNorFoundException.auditNotFoundWithName(entity, startDate, endDate, fullName);
+            } else {
+                throw ResourceNorFoundException.auditNotFoundWithoutName(entity, startDate, endDate);
+            }
         }
 
         List<AuditDto> auditDtos = auditsPage.getContent().stream()
@@ -106,9 +110,8 @@ public class AuditService {
                         .build())
                 .collect(Collectors.toList());
 
-
         return MessagePage.builder()
-                .note("Audits Found")
+                .note("Auditorías encontradas")
                 .object(auditDtos)
                 .totalElements((int) auditsPage.getTotalElements())
                 .totalPages(auditsPage.getTotalPages())
@@ -116,6 +119,7 @@ public class AuditService {
                 .pageSize(auditsPage.getSize())
                 .build();
     }
+
 
     private String formatRequestToJson(Object object) {
         if (object == null) {

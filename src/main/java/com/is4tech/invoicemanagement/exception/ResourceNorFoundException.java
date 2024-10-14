@@ -2,9 +2,9 @@ package com.is4tech.invoicemanagement.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -23,8 +23,21 @@ public class ResourceNorFoundException extends RuntimeException {
     }
 
     public ResourceNorFoundException(String resourceName) {
-        super(String.format("There are no %s records in the system", resourceName));
+        super(String.format("No se encontraron registros de %s en el sistema", resourceName));
         this.resourceName = resourceName;
     }
 
+    public static ResourceNorFoundException auditNotFoundWithName(String entity, LocalDate startDate, LocalDate endDate, String fullName) {
+        return new ResourceNorFoundException(
+                String.format("auditorías para la entidad '%s' en el rango de fechas entre %s y %s para el nombre: %s",
+                        entity, startDate, endDate, fullName)
+        );
+    }
+
+    public static ResourceNorFoundException auditNotFoundWithoutName(String entity, LocalDate startDate, LocalDate endDate) {
+        return new ResourceNorFoundException(
+                String.format("auditorías para la entidad '%s' en el rango de fechas entre %s y %s",
+                        entity, startDate, endDate)
+        );
+    }
 }

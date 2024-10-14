@@ -35,17 +35,12 @@ public class RolService {
     }
 
     @Transactional(readOnly = true)
-    public MessagePage listAllRol(Pageable pageable, HttpServletRequest request) {
+    public MessagePage listAllRol(Pageable pageable) {
         Page<Rol> roles = rolRepository.findAll(pageable);
 
         if (roles.isEmpty()) {
-            int statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(null, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, pageable.toString());
         }
-
-        int statusCode = HttpStatus.OK.value();
-        auditService.logAudit(roles.getContent(), this.getClass().getMethods()[0], null, statusCode, "Rol", request);
 
         return MessagePage.builder()
                 .note("Roles Retrieved Successfully")
@@ -75,7 +70,7 @@ public class RolService {
     }
 
     @Transactional(readOnly = true)
-    public MessagePage findByNameRol(NameSearchDto roleSearchDto, Pageable pageable, HttpServletRequest request) {
+    public MessagePage findByNameRol(NameSearchDto roleSearchDto, Pageable pageable) {
         if (roleSearchDto == null || roleSearchDto.getName() == null) {
             throw new BadRequestException("Rol name cannot be null or empty");
         }
@@ -84,13 +79,8 @@ public class RolService {
         Page<Rol> roles = rolRepository.findByNameContainingIgnoreCase(rolName, pageable);
 
         if (roles.isEmpty()) {
-            int statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(rolName, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
             throw new ResourceNorFoundException("Rol", "Name", rolName);
         }
-
-        int statusCode = HttpStatus.OK.value();
-        auditService.logAudit(rolName, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
 
         List<RolDto> rolDtos = roles.getContent().stream()
                 .map(this::toDtoRol)
@@ -115,28 +105,25 @@ public class RolService {
             rolRepository.delete(rol);
 
             int statusCode = HttpStatus.NO_CONTENT.value();
-            auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
+            auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         } catch (ResourceNorFoundException e) {
             int statusCode = HttpStatus.NOT_FOUND.value();
-            auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
+            auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
             throw e;
 
         } catch (Exception e) {
             int statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-            auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, "Rol", request);
+            auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
             throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
     }
 
     @Transactional(readOnly = true)
-    public RolDto findByIdRol(Integer id, HttpServletRequest request) {
+    public RolDto findByIdRol(Integer id) {
         RolDto rolDto = rolRepository.findById(id)
                 .map(this::toDtoRol)
                 .orElseThrow(() -> new ResourceNorFoundException("Role not found with ID: " + id));
-
-        int statusCode = HttpStatus.OK.value();
-        auditService.logAudit(rolDto, this.getClass().getMethods()[0], null, statusCode, NAME_ENTITY, request);
 
         return rolDto;
     }
