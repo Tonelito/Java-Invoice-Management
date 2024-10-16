@@ -100,29 +100,32 @@ public class AuthController {
 
     @PostMapping("/verific-code")
     public ResponseEntity<Message> verificRecoverPassword(@RequestBody VerificCodeRequest verificCodeRequest) {
+        String passwordValidationResult = PasswordValidator.validatePassword(verificCodeRequest.getCodePassword().getNewPassword());
+        if (passwordValidationResult.isEmpty()) {
+            return new ResponseEntity<>(Message.builder()
+                    .note("Password validation failed")
+                    .object(passwordValidationResult)
+                    .build(),
+                    HttpStatus.BAD_REQUEST);
+        }
         String response = sendEmail.verificCode(verificCodeRequest.getCodePassword());
-
         if (response.equals("Code valid")) {
-            String passwordValidationResult = PasswordValidator.validatePassword(verificCodeRequest.getCodePassword().getNewPassword());
-
-            if (!passwordValidationResult.isEmpty()) {
-                return new ResponseEntity<>(Message.builder()
-                        .note("Password validation failed")
-                        .object(passwordValidationResult)
-                        .build(),
-                        HttpStatus.BAD_REQUEST);
-            }
-
             String newPassword = passwordEncoder.encode(verificCodeRequest.getCodePassword().getNewPassword());
             authenticationService.updatePasswordCode(newPassword, verificCodeRequest.getEmail().getEmail());
             response = "The password modified successfully";
-        }
 
+
+            return new ResponseEntity<>(Message.builder()
+                    .note("Code verification result")
+                    .object(response)
+                    .build(),
+                    HttpStatus.OK);
+        }
         return new ResponseEntity<>(Message.builder()
-                .note("Code verification result")
+                .note("Code verification error internal")
                 .object(response)
                 .build(),
-                HttpStatus.OK);
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @PostMapping("/change-password")

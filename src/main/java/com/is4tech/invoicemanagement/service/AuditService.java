@@ -122,7 +122,7 @@ public class AuditService {
 
     @Transactional(readOnly = true)
     public MessagePage findAllAudits(Pageable pageable) {
-        Page<Audit> auditsPage = auditRepository.findAll(pageable);
+        Page<Audit> auditsPage = auditRepository.findAllByOrderByDatetimeAsc(pageable);
 
         if (auditsPage.isEmpty()) {
             throw new ResourceNorFoundException("Auditorías");

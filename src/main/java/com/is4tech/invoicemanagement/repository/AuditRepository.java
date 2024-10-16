@@ -19,4 +19,6 @@ public interface AuditRepository extends JpaRepository<Audit, Integer> {
                                                             @Param("endDate") LocalDate endDate,
                                                             @Param("fullName") String fullName,
                                                             Pageable pageable);
+
+    Page<Audit> findAllByOrderByDatetimeAsc(Pageable pageable);
 }
