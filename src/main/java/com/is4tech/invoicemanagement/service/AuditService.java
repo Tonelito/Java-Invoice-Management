@@ -14,7 +14,6 @@ import com.is4tech.invoicemanagement.utils.MessagePage;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,6 @@ public class AuditService {
     private final AuditRepository auditRepository;
     private final JwtUtil jwtUtil;
 
-    @Autowired
     public AuditService(UserRepository userRepository, AuditRepository auditRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.auditRepository = auditRepository;
@@ -60,11 +58,11 @@ public class AuditService {
         auditDto.setEntity(entity);
         auditDto.setErrorMessage(ex != null ? ex.getMessage() : null);
         auditDto.setRequest(formatRequestToJson(object));
-        saveAudit(auditDto);
+        this.saveAudit(auditDto);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected void saveAudit(AuditDto auditDto) {
+    public void saveAudit(AuditDto auditDto) {
         if (auditDto.getUserId() == null) {
             throw new BadRequestException("User ID must not be null");
         }

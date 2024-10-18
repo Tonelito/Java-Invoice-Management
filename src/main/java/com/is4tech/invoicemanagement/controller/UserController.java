@@ -33,6 +33,7 @@ public class UserController {
 
     private static final String NAME_ENTITY = "Users";
     private static final String ID_ENTITY = "user_id";
+    private static final String UNEXPEXTED_ERROR = "Unexpected error occurred: ";
     int statusCode;
 
     @PostMapping("/create")
@@ -74,7 +75,7 @@ public class UserController {
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
             auditService.logAudit(userDto, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPEXTED_ERROR + e.getMessage());
         }
     }
 
@@ -105,7 +106,7 @@ public class UserController {
         } catch (DataAccessException e) {
             throw new BadRequestException("Error updating record: " + e.getMessage());
         } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPEXTED_ERROR + e.getMessage());
         }
     }
 
@@ -119,7 +120,7 @@ public class UserController {
         } catch (ResourceNorFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPEXTED_ERROR + e.getMessage());
         }
     }
 
@@ -134,7 +135,7 @@ public class UserController {
         } catch (ResourceNorFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPEXTED_ERROR + e.getMessage());
         }
     }
 
@@ -152,7 +153,7 @@ public class UserController {
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
             auditService.logAudit(id, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPEXTED_ERROR + e.getMessage());
         }
     }
 
@@ -172,7 +173,7 @@ public class UserController {
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
             auditService.logAudit(id, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPEXTED_ERROR + e.getMessage());
         }
     }
 }

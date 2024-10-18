@@ -3,7 +3,6 @@ package com.is4tech.invoicemanagement.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is4tech.invoicemanagement.model.Profile;
-import com.is4tech.invoicemanagement.dto.NameSearchDto;
 import com.is4tech.invoicemanagement.dto.ProfileDto;
 import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
@@ -24,14 +22,14 @@ import jakarta.servlet.http.HttpServletRequest;
 public class ProfileService {
 
   private final ProfileRespository profileRespository;
-  @Autowired
-  private AuditService auditService;
+  private final AuditService auditService;
 
   private static final String NAME_ENTITY = "Profile";
   private static final String ID_ENTITY = "profile_id";
 
-  public ProfileService(ProfileRespository profileRespository) {
+  public ProfileService(ProfileRespository profileRespository, AuditService auditService) {
     this.profileRespository = profileRespository;
+    this.auditService = auditService;
   }
 
   @Transactional
@@ -71,11 +69,9 @@ public class ProfileService {
 
   @Transactional(readOnly = true)
   public ProfileDto findByIdProfile(Integer id) {
-    ProfileDto profileDto = profileRespository.findById(id)
-        .map(this::toDto)
-        .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
-
-    return profileDto;
+    return profileRespository.findById(id)
+      .map(this::toDto)
+      .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
   }
 
   @Transactional(readOnly = true)
@@ -87,7 +83,7 @@ public class ProfileService {
       Page<Profile> profiles = profileRespository.findByNameContaining(nameShearchDto, pageable);
   
       if (profiles.isEmpty()) {
-          throw new ResourceNorFoundException("Profile", "Name", nameShearchDto);
+          throw new ResourceNorFoundException(NAME_ENTITY, "Name", nameShearchDto);
       }
   
       List<ProfileDto> profileDtos = profiles.getContent().stream()

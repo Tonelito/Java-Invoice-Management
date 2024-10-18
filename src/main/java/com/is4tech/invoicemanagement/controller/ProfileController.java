@@ -3,7 +3,6 @@ package com.is4tech.invoicemanagement.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -38,18 +37,19 @@ public class ProfileController {
   private final ProfileService profileService;
   private final RolService rolService;
   private final ProfileRoleDetailService profileRoleDetailService;
-  @Autowired
-  private AuditService auditService;
+  private final AuditService auditService;
 
   public ProfileController(ProfileService profileService, RolService rolService,
-      ProfileRoleDetailService profileRoleDetailService) {
+      ProfileRoleDetailService profileRoleDetailService, AuditService auditService) {
     this.profileService = profileService;
     this.rolService = rolService;
     this.profileRoleDetailService = profileRoleDetailService;
+    this.auditService = auditService;
   }
 
   private static final String NAME_ENTITY = "Profile";
   private static final String ID_ENTITY = "profile_id";
+  private static final String UNEXPEDCTED_ERROR = "Unexpected error occurred: ";
   int statusCode;
 
   @PostMapping("/create")
@@ -80,7 +80,7 @@ public class ProfileController {
       throw e;
     } catch (Exception e) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+      throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -112,7 +112,7 @@ public class ProfileController {
     } catch (DataAccessException exDt) {
       throw new BadRequestException("Error updating record: " + exDt.getMessage());
     } catch (Exception e) {
-      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+      throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -121,11 +121,10 @@ public class ProfileController {
     try {
       if (profileService.existsById(id)) {
         ProfileDto profileUpdate = profileService.findByIdProfile(id);
-        if (profileUpdate.getStatus()) {
-          profileUpdate.setStatus(false);
-        } else
-          profileUpdate.setStatus(true);
-
+        
+        boolean status = profileUpdate.getStatus();
+        profileUpdate.setStatus(!status);
+        
         profileService.saveProfile(profileUpdate, request);
 
         return new ResponseEntity<>(Message.builder()
@@ -138,7 +137,7 @@ public class ProfileController {
     } catch (DataAccessException exDt) {
       throw new BadRequestException("Error updating record: " + exDt.getMessage());
     } catch (Exception e) {
-      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+      throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -159,7 +158,7 @@ public class ProfileController {
     } catch (DataAccessException e) {
       throw new BadRequestException("Error deleting record: " + e.getMessage());
     } catch (Exception e) {
-      throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+      throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -169,7 +168,7 @@ public class ProfileController {
       ProfileDto profileDto = profileService.findByIdProfile(id);
       if (profileDto == null)
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
-      List<RolDto> rols = getAllRols(id, request);
+      List<RolDto> rols = getAllRols(id);
 
       return new ResponseEntity<>(Message.builder()
           .note("Record found")
@@ -189,14 +188,14 @@ public class ProfileController {
     } catch (Exception e) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
       auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-      throw new com.is4tech.invoicemanagement.exception.BadRequestException("Unexpected error occurred: " + e.getMessage());
+      throw new com.is4tech.invoicemanagement.exception.BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
-  @GetMapping("/show-by-name/{nameShearchDto}")
-  public ResponseEntity<MessagePage> showByNameProfile(@PathVariable String nameShearchDto, Pageable pageable, HttpServletRequest request) {
+  @PostMapping("/show-by-name")
+  public ResponseEntity<MessagePage> showByNameProfile(@RequestBody NameSearchDto nameShearchDto, Pageable pageable, HttpServletRequest request) {
     try {
-      MessagePage profileDto = profileService.findByNameProfile(nameShearchDto, pageable);
+      MessagePage profileDto = profileService.findByNameProfile(nameShearchDto.getName(), pageable);
       statusCode = HttpStatus.OK.value();
       return new ResponseEntity<>(profileDto, HttpStatus.OK);
     }catch (ResourceNorFoundException e) {
@@ -206,7 +205,7 @@ public class ProfileController {
     } catch (Exception e) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
       auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-      throw new com.is4tech.invoicemanagement.exception.BadRequestException("Unexpected error occurred: " + e.getMessage());
+      throw new com.is4tech.invoicemanagement.exception.BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -226,7 +225,7 @@ public class ProfileController {
       .rols(profileDto.getRolsId())
       .build();
 
-    List<RolDto> rols = new ArrayList();
+    List<RolDto> rols = new ArrayList<>();
     for (Integer roldId : profileDto.getRolsId()) {
       savedRolId(profileRoleDetailDtoId, request);
       rols.add(rolService.findByIdRol(roldId));
@@ -266,12 +265,12 @@ public class ProfileController {
     }
   }
 
-  private List<RolDto> getAllRols(Integer id, HttpServletRequest request){
+  private List<RolDto> getAllRols(Integer id){
     List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
     if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
     }
-    List<RolDto> rols = new ArrayList();
+    List<RolDto> rols = new ArrayList<>();
     for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
         rols.add(toRol(profilerRoleDetail.getRole()));
     }

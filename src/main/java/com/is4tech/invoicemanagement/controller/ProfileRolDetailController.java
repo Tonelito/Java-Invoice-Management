@@ -120,7 +120,7 @@ public class ProfileRolDetailController {
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, idProfile.toString());
         }
 
-        List<RolDto> rols = new ArrayList();
+        List<RolDto> rols = new ArrayList<>();
         for (ProfileRoleDetail profilerRoleDetail : profileRoleDetail) {
             rols.add(toRol(profilerRoleDetail.getRole()));
         }

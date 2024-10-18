@@ -43,7 +43,7 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "status")
-    private Boolean status = true;
+    private Boolean status;
     
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "profile_id")
