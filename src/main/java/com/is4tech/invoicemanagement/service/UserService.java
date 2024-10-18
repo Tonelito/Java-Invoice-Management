@@ -16,7 +16,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,18 +24,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ProfileRespository profileRepository;
-    @Autowired
-    private AuditService auditService;
+    private final UserRepository userRepository;
+    private final ProfileRespository profileRepository;
+    private final AuditService auditService;
     private final SendEmail sendEmail;
 
     private static final String NAME_ENTITY = "Users";
@@ -54,14 +51,7 @@ public class UserService {
         statusCode = HttpStatus.OK.value();
 
         List<UsersDto> userDtos = users.getContent().stream()
-                .map(user -> UsersDto.builder()
-                        .userId(user.getUserId())
-                        .fullName(user.getFullName())
-                        .email(user.getEmail())
-                        .profileId(user.getProfile() != null ? user.getProfile().getProfileId() : null)
-                        .dateOfBirth(user.getDateOfBirth())
-                        .status(user.getStatus())
-                        .build())
+                .map(this::toDto)
                 .collect(Collectors.toList());
 
         return MessagePage.builder()
@@ -177,14 +167,7 @@ public class UserService {
         }
 
         List<UsersDto> userDtos = users.getContent().stream()
-                .map(user -> UsersDto.builder()
-                        .userId(user.getUserId())
-                        .fullName(user.getFullName())
-                        .email(user.getEmail())
-                        .profileId(user.getProfile() != null ? user.getProfile().getProfileId() : null)
-                        .dateOfBirth(user.getDateOfBirth())
-                        .status(user.getStatus())
-                        .build())
+                .map(this::toDto)
                 .collect(Collectors.toList());
 
         return MessagePage.builder()
@@ -205,16 +188,18 @@ public class UserService {
             throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, userId.toString());
         }
 
-        UsersDto usersDto = UsersDto.builder()
+        return toDto(user);
+    }
+
+    public UsersDto toDto(User user){
+        return UsersDto.builder()
                 .userId(user.getUserId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .profileId(user.getProfile() != null ? user.getProfile().getProfileId() : null)
                 .dateOfBirth(user.getDateOfBirth())
-                .status(user.getStatus())
+                .status(Optional.ofNullable(user.getStatus()).orElse(true))
                 .build();
-
-        return usersDto;
     }
 
     public User toggleUserStatus(Integer userId) {

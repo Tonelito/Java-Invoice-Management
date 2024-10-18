@@ -31,7 +31,7 @@ public class SendEmail {
       helper.setTo(destination);
       helper.setFrom(from);
       helper.setSubject(subject);
-      helper.setText(htmlSend(destination, password, true), true);
+      helper.setText(htmlSend(destination, password), true);
   
       mail.send(mimeMessage);
   }
@@ -78,7 +78,7 @@ public class SendEmail {
     }
   }
 
-  private String htmlSend(String email, String password, boolean mostrarCredenciales) {
+  private String htmlSend(String email, String password) {
       return "<!DOCTYPE html>\n" +
               "<html lang='es'>\n" +
               "<head>\n" +

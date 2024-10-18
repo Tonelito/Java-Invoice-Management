@@ -8,7 +8,6 @@ import com.is4tech.invoicemanagement.exception.BadRequestException;
 import com.is4tech.invoicemanagement.exception.ResourceNorFoundException;
 import com.is4tech.invoicemanagement.utils.MessagePage;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,14 +23,14 @@ import com.is4tech.invoicemanagement.repository.RolRepository;
 public class RolService {
     
     private final RolRepository rolRepository;
-    @Autowired
-    private AuditService auditService;
+    private final AuditService auditService;
 
     private static final String NAME_ENTITY = "Role";
     private static final String ID_ENTITY = "role_id";
 
-    public RolService(RolRepository rolRepository) {
+    public RolService(RolRepository rolRepository, AuditService auditService) {
         this.rolRepository = rolRepository;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -121,11 +120,9 @@ public class RolService {
 
     @Transactional(readOnly = true)
     public RolDto findByIdRol(Integer id) {
-        RolDto rolDto = rolRepository.findById(id)
-                .map(this::toDtoRol)
-                .orElseThrow(() -> new ResourceNorFoundException("Role not found with ID: " + id));
-
-        return rolDto;
+        return rolRepository.findById(id)
+            .map(this::toDtoRol)
+            .orElseThrow(() -> new ResourceNorFoundException("Role not found with ID: " + id));
     }
 
     @Transactional

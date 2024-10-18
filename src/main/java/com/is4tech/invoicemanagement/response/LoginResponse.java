@@ -6,8 +6,7 @@ public class LoginResponse {
     private String token;
     private long expiresIn;
     private List<String> authorities;
-    private Integer userId; // Agregar userId
-
+    private Integer userId;
     public String getToken() {
         return token;
     }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -36,18 +35,17 @@ public class ProfileRoleDetailService {
     private static final String NAME_ENTITY_ROL = "Rol";
     private static final String ID_ENTITY = "profile_rol_detail_id";
 
-    @Autowired
-    private AuditService auditService;
-
+    private final AuditService auditService;
     private final ProfileRoleDetailRepository prdRespository;
     private final ProfileService profileService;
     private final RolService rolService;
 
     public ProfileRoleDetailService(ProfileRoleDetailRepository prdRespository, ProfileService profileService,
-            RolService rolService) {
+            RolService rolService, AuditService auditService) {
         this.prdRespository = prdRespository;
         this.profileService = profileService;
         this.rolService = rolService;
+        this.auditService = auditService;
     }
 
     public MessagePage listAllProfileRolDetail(Pageable pageable) {
@@ -123,11 +121,9 @@ public class ProfileRoleDetailService {
     }
     @Transactional(readOnly = true)
     public ProfileRoleDetailDto finByIdProfileRoleDetail(ProfileRoleDetailId id) {
-        ProfileRoleDetailDto profileRoleDetailDto = prdRespository.findById(id)
+        return prdRespository.findById(id)
             .map(this::toDtoRols)
             .orElseThrow(() -> new ResourceNorFoundException("Role not found with ID: " + id));
-
-        return profileRoleDetailDto;
     }
 
     @Transactional
@@ -166,9 +162,7 @@ public class ProfileRoleDetailService {
     }
 
     public List<ProfileRoleDetail> findByIdProfileRol(Integer profileId) {
-        List<ProfileRoleDetail> profileRoleDetailDto = prdRespository.findByIdProfileObject(profileId);
-
-        return profileRoleDetailDto;
+        return prdRespository.findByIdProfileObject(profileId);
     }
 
     private ProfileRoleDetailDto toDto(ProfileRoleDetail profileRoleDetail) {

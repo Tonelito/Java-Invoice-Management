@@ -14,6 +14,8 @@ import com.is4tech.invoicemanagement.utils.PasswordValidator;
 import com.is4tech.invoicemanagement.utils.ResetCodeGenerator;
 import com.is4tech.invoicemanagement.utils.SendEmail;
 
+import org.springframework.security.core.Authentication;
+
 import com.is4tech.invoicemanagement.service.AuthService;
 
 import jakarta.mail.MessagingException;
@@ -22,6 +24,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +47,8 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
         this.sendEmail = sendEmail;
     }
+
+    private static final String CODE_VERIFICATION = "Code verification result";
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody @Valid UsersDto usersDto) throws MessagingException {
@@ -116,7 +121,7 @@ public class AuthController {
 
 
             return new ResponseEntity<>(Message.builder()
-                    .note("Code verification result")
+                    .note(CODE_VERIFICATION)
                     .object(response)
                     .build(),
                     HttpStatus.OK);
@@ -129,10 +134,23 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<Message> changePassword(@RequestBody UserChangePasswordDto userChangePasswordDto) {
+    public ResponseEntity<Message> changePassword(
+            @RequestBody UserChangePasswordDto userChangePasswordDto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String emailFromToken = authentication.getName();
+
+        if (!emailFromToken.equals(userChangePasswordDto.getEmail())) {
+            return new ResponseEntity<>(Message.builder()
+                    .note("Email validation failed")
+                    .object("The email provided does not match the authenticated user's email")
+                    .build(),
+                    HttpStatus.FORBIDDEN);
+        }
+
         String passwordValidationResult = PasswordValidator.validatePassword(userChangePasswordDto.getNewPassword());
 
-        if (!passwordValidationResult.equals("La contraseña es válida.")) {
+        if (!passwordValidationResult.equals("La contraseña es valida.")) {
             return new ResponseEntity<>(Message.builder()
                     .note("Password validation failed")
                     .object(passwordValidationResult)
@@ -140,18 +158,22 @@ public class AuthController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        String message = "The password not modified";
         User user = authenticationService.findByEmail(userChangePasswordDto.getEmail());
 
-        if (passwordEncoder.matches(userChangePasswordDto.getPassword(), user.getPassword())) {
-            authenticationService.updatePasswordCode(passwordEncoder.encode(userChangePasswordDto.getNewPassword()), userChangePasswordDto.getEmail());
-            message = "The password modified";
+        if (!passwordEncoder.matches(userChangePasswordDto.getPassword(), user.getPassword())) {
+            return new ResponseEntity<>(Message.builder()
+            .note(CODE_VERIFICATION)
+            .object("The password not modified")
+            .build(),
+            HttpStatus.UNAUTHORIZED);
         }
 
+        authenticationService.updatePasswordCode(passwordEncoder.encode(userChangePasswordDto.getNewPassword()), userChangePasswordDto.getEmail());
         return new ResponseEntity<>(Message.builder()
-                .note("Code verification result")
-                .object(message)
-                .build(),
-                HttpStatus.OK);
+            .note(CODE_VERIFICATION)
+            .object("The password modified")
+            .build(),
+            HttpStatus.OK);
     }
+
 }
