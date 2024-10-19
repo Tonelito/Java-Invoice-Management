@@ -344,4 +344,8 @@
             <column name="amount" type="int"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="20241019-1" author="echamale">
+        <dropColumn tableName="invoice" columnName="discount"/>
+    </changeSet>
 </databaseChangeLog>
