@@ -67,30 +67,46 @@ public class ProfileService {
     }
   }
 
+  @Transactional
+  public ProfileDto updateProfileStatus(ProfileDto profileDto, HttpServletRequest request) {
+    try {
+      Profile profile = profileRespository.findById(profileDto.getProfileId())
+          .orElseThrow(() -> new ResourceNorFoundException("Profile not found"));
+
+      profile.setStatus(!profile.getStatus());
+
+      Profile updatedProfile = profileRespository.save(profile);
+
+      return toDto(updatedProfile);
+    } catch (Exception e) {
+      throw new BadRequestException("Error updating profile status: " + e.getMessage());
+    }
+  }
+
   @Transactional(readOnly = true)
   public ProfileDto findByIdProfile(Integer id) {
     return profileRespository.findById(id)
-      .map(this::toDto)
-      .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
+        .map(this::toDto)
+        .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
   }
 
   @Transactional(readOnly = true)
   public MessagePage findByNameProfile(String nameShearchDto, Pageable pageable) {
-      if (nameShearchDto == null || nameShearchDto.isEmpty()) {
-          throw new BadRequestException("Profile name cannot be null or empty");
-      } 
-  
-      Page<Profile> profiles = profileRespository.findByNameContaining(nameShearchDto, pageable);
-  
-      if (profiles.isEmpty()) {
-          throw new ResourceNorFoundException(NAME_ENTITY, "Name", nameShearchDto);
-      }
-  
-      List<ProfileDto> profileDtos = profiles.getContent().stream()
-              .map(this::toDto)
-              .collect(Collectors.toList());
-  
-      return MessagePage.builder()
+    if (nameShearchDto == null || nameShearchDto.isEmpty()) {
+      throw new BadRequestException("Profile name cannot be null or empty");
+    }
+
+    Page<Profile> profiles = profileRespository.findByNameContaining(nameShearchDto, pageable);
+
+    if (profiles.isEmpty()) {
+      throw new ResourceNorFoundException(NAME_ENTITY, "Name", nameShearchDto);
+    }
+
+    List<ProfileDto> profileDtos = profiles.getContent().stream()
+        .map(this::toDto)
+        .collect(Collectors.toList());
+
+    return MessagePage.builder()
         .note("Profiles Found")
         .object(profileDtos)
         .totalElements((int) profiles.getTotalElements())
@@ -99,13 +115,13 @@ public class ProfileService {
         .pageSize(profiles.getSize())
         .build();
   }
-  
 
   @Transactional
   public void deleteProfile(ProfileDto profileDto, HttpServletRequest request) {
     try {
       Profile profile = profileRespository.findById(profileDto.getProfileId())
-        .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(profileDto.getProfileId())));
+          .orElseThrow(
+              () -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(profileDto.getProfileId())));
 
       profileRespository.delete(profile);
 
@@ -130,13 +146,13 @@ public class ProfileService {
 
     try {
       Profile existingProfile = profileRespository.findById(id)
-              .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
+          .orElseThrow(() -> new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, String.valueOf(id)));
 
       if (profileDto.getName() != null) {
-          existingProfile.setName(profileDto.getName());
+        existingProfile.setName(profileDto.getName());
       }
       if (profileDto.getDescription() != null) {
-          existingProfile.setDescription(profileDto.getDescription());
+        existingProfile.setDescription(profileDto.getDescription());
       }
 
       Profile savedProfile = profileRespository.save(existingProfile);

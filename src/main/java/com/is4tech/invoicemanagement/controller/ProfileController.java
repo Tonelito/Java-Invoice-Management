@@ -122,14 +122,11 @@ public class ProfileController {
       if (profileService.existsById(id)) {
         ProfileDto profileUpdate = profileService.findByIdProfile(id);
         
-        boolean status = profileUpdate.getStatus();
-        profileUpdate.setStatus(!status);
-        
-        profileService.saveProfile(profileUpdate, request);
+        ProfileDto profile = profileService.updateProfileStatus(profileUpdate, request);
 
         return new ResponseEntity<>(Message.builder()
             .note("Update successfully")
-            .object(profileUpdate)
+            .object(profile)
             .build(),
             HttpStatus.OK);
       } else
