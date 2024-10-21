@@ -348,4 +348,14 @@
     <changeSet id="20241019-1" author="echamale">
         <dropColumn tableName="invoice" columnName="discount"/>
     </changeSet>
+    
+    <changeSet id="20241021-1" author="echamale">
+        <addColumn tableName="invoice">
+            <column name="total_taxes" type="double"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20241021-2" author="echamale">
+        <dropTable tableName="report"/>
+    </changeSet>
 </databaseChangeLog>
