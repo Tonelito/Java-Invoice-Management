@@ -4,7 +4,6 @@ import com.is4tech.invoicemanagement.service.AuditService;
 import com.is4tech.invoicemanagement.utils.MessagePage;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,14 +29,18 @@ import jakarta.validation.Valid;
 @RequestMapping("/invoice-management/v0.1/role")
 public class RolController {
 
-    @Autowired
-    private RolService rolService;
+    private final RolService rolService;
+    private final AuditService auditService;
+    
+    public RolController(RolService rolService, AuditService auditService) {
+        this.rolService = rolService;
+        this.auditService = auditService;
+    }
 
     private static final String NAME_ENTITY = "Role";
-    private static final String ID_ENTITY = "Id";
+    private static final String ID_ENTITY = "role_id";
+    private static final String UNEXPECTED_ERROR = "Unexpected error occurred: ";
     int statusCode;
-    @Autowired
-    private AuditService auditService;
 
     @PostMapping("/create")
     public ResponseEntity<Message> saveRol(@RequestBody @Valid RolDto rolDto, HttpServletRequest request) throws BadRequestException {
@@ -56,10 +59,10 @@ public class RolController {
             throw new BadRequestException("Error saving record: " + e.getMessage());
         } catch (ResourceNorFoundException e) {
             statusCode = HttpStatus.NOT_FOUND.value();
-            throw e;
+            throw new ResourceNorFoundException(NAME_ENTITY);
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPECTED_ERROR + e.getMessage());
         }
     }
 
@@ -84,7 +87,7 @@ public class RolController {
         } catch (DataAccessException exDt) {
             throw new BadRequestException("Error updating record: " + exDt.getMessage());
         } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPECTED_ERROR + e.getMessage());
         }
     }
 
@@ -100,16 +103,16 @@ public class RolController {
                     HttpStatus.NO_CONTENT);
 
         } catch (ResourceNorFoundException e) {
-            throw new BadRequestException("Rol not found: " + e.getMessage());
+            throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
         } catch (DataAccessException e) {
-            throw new BadRequestException("Error deleting record: " + e.getMessage());
+            throw new BadRequestException("Error updating record: " + e.getMessage());
         } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPECTED_ERROR + e.getMessage());
         }
     }
 
     @GetMapping("/show-all")
-    public ResponseEntity<MessagePage> showAllRoles(Pageable pageable, HttpServletRequest request){
+    public ResponseEntity<MessagePage> showAllRoles(Pageable pageable, HttpServletRequest request) throws BadRequestException{
         try {
             MessagePage message = rolService.listAllRol(pageable);
             statusCode = HttpStatus.OK.value();
@@ -118,11 +121,11 @@ public class RolController {
         } catch (ResourceNorFoundException e) {
             statusCode = HttpStatus.NOT_FOUND.value();
             auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
-            throw e;
+            throw new ResourceNorFoundException(NAME_ENTITY);
         } catch (Exception e) {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
             auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-            throw new com.is4tech.invoicemanagement.exception.BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPECTED_ERROR + e.getMessage());
         }
     }
 
@@ -134,9 +137,9 @@ public class RolController {
             return new ResponseEntity<>(messagePage, HttpStatus.OK);
 
         } catch (ResourceNorFoundException e) {
-            throw e;
+            throw new ResourceNorFoundException(NAME_ENTITY);
         } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
+            throw new BadRequestException(UNEXPECTED_ERROR + e.getMessage());
         }
     }
 }

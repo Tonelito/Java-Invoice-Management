@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Getter
 @Setter
+@Data
 @Builder
 @Table(name = "users")
 public class User implements UserDetails {
@@ -57,6 +58,11 @@ public class User implements UserDetails {
                 .map(profileRoleDetail -> 
                 new SimpleGrantedAuthority(profileRoleDetail.getRole().getCode()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
     }
 
     @Override

@@ -119,6 +119,7 @@ public class ProfileRoleDetailService {
             throw e;
         }
     }
+    
     @Transactional(readOnly = true)
     public ProfileRoleDetailDto finByIdProfileRoleDetail(ProfileRoleDetailId id) {
         return prdRespository.findById(id)
