@@ -77,7 +77,7 @@ public class ProfileController {
       throw new BadRequestException("Error saving record: " + e.getMessage());
     } catch (ResourceNorFoundException e) {
       statusCode = HttpStatus.NOT_FOUND.value();
-      throw e;
+      throw new ResourceNorFoundException(NAME_ENTITY);
     } catch (Exception e) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
       throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
@@ -185,7 +185,7 @@ public class ProfileController {
     } catch (Exception e) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
       auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-      throw new com.is4tech.invoicemanagement.exception.BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
+      throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -198,11 +198,11 @@ public class ProfileController {
     }catch (ResourceNorFoundException e) {
       statusCode = HttpStatus.NOT_FOUND.value();
       auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request );
-      throw e;
+      throw new ResourceNorFoundException(NAME_ENTITY);
     } catch (Exception e) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
       auditService.logAudit(null, this.getClass().getMethods()[0], e, statusCode, NAME_ENTITY, request);
-      throw new com.is4tech.invoicemanagement.exception.BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
+      throw new BadRequestException(UNEXPEDCTED_ERROR + e.getMessage());
     }
   }
 
@@ -216,7 +216,7 @@ public class ProfileController {
         HttpStatus.OK);
   }
 
-  private List<RolDto> savedRols(ProfileDto profileDto, Integer id, HttpServletRequest request){
+  public List<RolDto> savedRols(ProfileDto profileDto, Integer id, HttpServletRequest request){
     ProfileRoleDetailDtoId profileRoleDetailDtoId = ProfileRoleDetailDtoId.builder()
       .profileId(id)
       .rols(profileDto.getRolsId())
@@ -230,7 +230,7 @@ public class ProfileController {
     return rols;
   }
 
-  private void savedRolId(ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) {
+  public void savedRolId(ProfileRoleDetailDtoId profileRoleDetailDtoId, HttpServletRequest request) {
     Integer profileId = profileRoleDetailDtoId.getProfileId();
     List<Integer> rolsId = profileRoleDetailService.existByIdProfileRolNotIncluidesDetail(profileId,
         profileRoleDetailDtoId);
@@ -262,7 +262,7 @@ public class ProfileController {
     }
   }
 
-  private List<RolDto> getAllRols(Integer id){
+  public List<RolDto> getAllRols(Integer id){
     List<ProfileRoleDetail> profileRoleDetail = profileRoleDetailService.findByIdProfileRol(id);
     if (profileRoleDetail == null || profileRoleDetail.isEmpty()) {
         throw new ResourceNorFoundException(NAME_ENTITY, ID_ENTITY, id.toString());
@@ -274,7 +274,7 @@ public class ProfileController {
     return rols;
   }
 
-  private RolDto toRol(Rol rol) {
+  public RolDto toRol(Rol rol) {
     return RolDto.builder()
         .rolId(rol.getRolId())
         .name(rol.getName())
